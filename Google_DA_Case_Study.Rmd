@@ -1,0 +1,420 @@
+---
+title: "Google_DA_Case_Study"
+author: "Linda Wakamoto"
+date: "2024-08-13"
+output: html_document
+---
+```{r setup, include=FALSE}
+#options(repos = list(CRAN="http://cran.rstudio.com/"))
+#Step 1: Install and load necessary packages:
+#install.packages("pacman")
+#if (!require("pacman")) install.packages("pacman") pacman::p_load("here", "janitor", "tidyverse", "ggplot2", "dplyr","rmarkdown","lubridate","wesanderson")
+
+#install.packages("here")
+#install.packages("janitor")
+#install.packages("rmarkdown")
+#install.packages("lubridate")
+#install.packages("wesanderson")
+library(here)
+library(janitor)
+library(tidyverse)
+library(ggplot2)
+library(dplyr)
+library(rmarkdown)
+library(lubridate)
+library(wesanderson)
+```
+
+```{r cars}
+#Step 2: Import all csv files:
+dailyActivity_merged <- read_csv("Downloads/Fitabase Data 4.12.16-5.12.16/dailyActivity_merged.csv")
+dailyCalories_merged <- read_csv("Downloads/Fitabase Data 4.12.16-5.12.16/dailyCalories_merged.csv")
+dailyIntensities_merged <- read_csv("Downloads/Fitabase Data 4.12.16-5.12.16/dailyIntensities_merged.csv")
+dailySteps_merged <- read_csv("Downloads/Fitabase Data 4.12.16-5.12.16/dailySteps_merged.csv")
+heartrate_seconds_merged <- read_csv("Downloads/Fitabase Data 4.12.16-5.12.16/heartrate_seconds_merged.csv")
+hourlyCalories_merged <- read_csv("Downloads/Fitabase Data 4.12.16-5.12.16/hourlyCalories_merged.csv")
+hourlyIntensities_merged <- read_csv("Downloads/Fitabase Data 4.12.16-5.12.16/hourlyIntensities_merged.csv")
+hourlySteps_merged <- read_csv("Downloads/Fitabase Data 4.12.16-5.12.16/hourlySteps_merged.csv")
+minuteCaloriesNarrow_merged <- read_csv("Downloads/Fitabase Data 4.12.16-5.12.16/minuteCaloriesNarrow_merged.csv")
+minuteCaloriesWide_merged <- read_csv("Downloads/Fitabase Data 4.12.16-5.12.16/minuteCaloriesWide_merged.csv")
+minuteIntensitiesNarrow_merged <- read_csv("Downloads/Fitabase Data 4.12.16-5.12.16/minuteIntensitiesNarrow_merged.csv")
+minuteIntensitiesWide_merged <- read_csv("Downloads/Fitabase Data 4.12.16-5.12.16/minuteIntensitiesWide_merged.csv")
+minuteMETsNarrow_merged <- read_csv("Downloads/Fitabase Data 4.12.16-5.12.16/minuteMETsNarrow_merged.csv")
+minuteSleep_merged <- read_csv("Downloads/Fitabase Data 4.12.16-5.12.16/minuteSleep_merged.csv")
+minuteStepsNarrow_merged <- read_csv("Downloads/Fitabase Data 4.12.16-5.12.16/minuteStepsNarrow_merged.csv")
+minuteStepsWide_merged <- read_csv("Downloads/Fitabase Data 4.12.16-5.12.16/minuteStepsWide_merged.csv")
+sleepDay_merged <- read_csv("Downloads/Fitabase Data 4.12.16-5.12.16/sleepDay_merged.csv")
+weightLogInfo_merged <- read_csv("Downloads/Fitabase Data 4.12.16-5.12.16/weightLoginfo_merged.csv")
+```
+
+```{r}
+#Step 3: Check for null values and duplicates:
+
+#65 NAs exist in weightLogInfo_merged dataset, all others have 0.
+sum(is.na(dailyActivity_merged))
+sum(is.na(dailyCalories_merged))
+sum(is.na(dailyIntensities_merged))
+sum(is.na(dailySteps_merged))
+sum(is.na(heartrate_seconds_merged))
+sum(is.na(hourlyCalories_merged))
+sum(is.na(hourlyIntensities_merged))
+sum(is.na(hourlySteps_merged))
+sum(is.na(minuteCaloriesNarrow_merged))
+sum(is.na(minuteCaloriesWide_merged))
+sum(is.na(minuteIntensitiesNarrow_merged))
+sum(is.na(minuteIntensitiesWide_merged))
+sum(is.na(minuteMETsNarrow_merged))
+sum(is.na(minuteSleep_merged))
+sum(is.na(minuteStepsNarrow_merged))
+sum(is.na(minuteStepsWide_merged))
+sum(is.na(sleepDay_merged))
+sum(is.na(weightLogInfo_merged))
+
+#view which variable has most NAs in dataset. All NAs exist in the Fat variable, which we do not focus on in this case study, so it is ok to proceed without removing NAs.
+summary(weightLogInfo_merged) 
+
+#543 in minuteSleep_merged, 3 in sleepDay_merged.
+sum(duplicated(dailyActivity_merged))
+sum(duplicated(dailyCalories_merged))
+sum(duplicated(dailyIntensities_merged))
+sum(duplicated(dailySteps_merged))
+sum(duplicated(heartrate_seconds_merged))
+sum(duplicated(hourlyCalories_merged))
+sum(duplicated(hourlyIntensities_merged))
+sum(duplicated(hourlySteps_merged))
+sum(duplicated(minuteCaloriesNarrow_merged))
+sum(duplicated(minuteCaloriesWide_merged))
+sum(duplicated(minuteIntensitiesNarrow_merged))
+sum(duplicated(minuteIntensitiesWide_merged))
+sum(duplicated(minuteMETsNarrow_merged))
+sum(duplicated(minuteSleep_merged))
+sum(duplicated(minuteStepsNarrow_merged))
+sum(duplicated(minuteStepsWide_merged))
+sum(duplicated(sleepDay_merged))
+sum(duplicated(weightLogInfo_merged))
+```
+
+```{r}
+#Step 4: Transform data so it's ready to be analyzed.
+
+#Decided to not remove duplicates in two datasets because it is possibly a coincidence.
+cleaned_minuteSleep_merged <- minuteSleep_merged %>% distinct()
+cleaned_sleepDay_merged <- sleepDay_merged %>% distinct()
+
+#standardize the datasets' dates format:
+cleaned_activity <- dailyActivity_merged %>% 
+    rename(Date = ActivityDate) %>% 
+    mutate(Date = as.Date(Date, format = '%m/%d/%Y'),  
+        Day = weekdays(Date), 
+        Month = months(Date))
+
+cleaned_sleep <- sleepDay_merged %>%
+    rename(Date = SleepDay) %>% 
+    mutate(Date = as.POSIXct(Date, format = '%m/%d/%Y %I:%M:%S %p'),
+        Time = format(Date, format = '%H:%M:%S'),
+        Day = weekdays(Date),
+        Month = months(Date))
+
+cleaned_weight <- weightLogInfo_merged %>%
+    mutate(Date = as.POSIXct(Date, format = '%m/%d/%Y %I:%M:%S %p'),
+        Time = format(Date, format = '%H:%M:%S'), # Makes a 24hr Time col
+        Day = weekdays(Date),
+        Month = months(Date))
+
+cleaned_hourly_steps <- hourlySteps_merged %>%
+    rename(Date = ActivityHour) %>%
+    mutate(Date = as.POSIXct(Date, format = '%m/%d/%Y %I:%M:%S %p'),
+        Time = format(Date, format = '%H:%M:%S'),
+        Day = weekdays(Date),
+        Month = months(Date))
+
+cleaned_hourly_intensity <- hourlyIntensities_merged %>%
+    mutate(Date = as.POSIXct(ActivityHour, format = '%m/%d/%Y %I:%M:%S %p'),  
+        Time = format(Date, format = '%H:%M:%S'),
+        Day = weekdays(Date),
+        Month = months(Date))
+##all dataframes have the same datetime and are able to be merged
+```
+
+```{r}
+#Merge datasets by Id
+activity_sleep <- merge(cleaned_activity, cleaned_sleep, by = "Id")
+activity_weight<- merge(cleaned_activity, cleaned_weight, by = "Id")
+activity_intensity <- merge(cleaned_activity, cleaned_hourly_intensity, by = c('Id', 'Date', 'Day', 'Month'))
+hourly_intensity_steps <- merge(cleaned_hourly_intensity, cleaned_hourly_steps, by = c('Id', 'Date', 'Day', 'Month', 'Time'))
+
+max_date_ca <- max(cleaned_activity$Date)
+min_date_ca <- min(cleaned_activity$Date)
+```
+
+```{r} 
+#summarize all datasets
+
+#count all distinct IDs. All datasets have 33 distinct IDs except for heartrate_seconds_merged (14), minuteSleep_merged(24), sleepDay_merged(24), weightLogInfo_merged(8). Is this an exclusion factor?
+
+#dailyActivity_merged
+glimpse(dailyActivity_merged)
+head(dailyActivity_merged)
+colnames(dailyActivity_merged) 
+n_distinct(dailyActivity_merged$Id) #33
+nrow(dailyActivity_merged) #940
+
+#heartrate_seconds_merged
+#what does this dataset contain values for?
+head(heartrate_seconds_merged)
+colnames(heartrate_seconds_merged) 
+n_distinct(heartrate_seconds_merged$Id) #14
+nrow(heartrate_seconds_merged) #2483658
+
+#hourlyCalories_merged
+#what does Calories mean?
+head(hourlyCalories_merged)
+colnames(hourlyCalories_merged) 
+n_distinct(hourlyCalories_merged$Id) #33
+nrow(hourlyCalories_merged) #22099
+
+#hourlyIntensities_merged
+n_distinct(hourlyIntensities_merged$Id) #33
+nrow(hourlyIntensities_merged) #22099
+
+#hourlySteps_merged
+n_distinct(hourlySteps_merged$Id) #33
+nrow(hourlySteps_merged) #22099
+
+#minuteCaloriesNarrow_merged
+n_distinct(minuteCaloriesNarrow_merged$Id) #33
+nrow(minuteCaloriesNarrow_merged) #1325580
+
+#minuteCaloriesWide_merged
+n_distinct(minuteCaloriesWide_merged$Id) #33
+nrow(minuteCaloriesWide_merged) #21645
+
+#minuteIntensitiesNarrow_merged
+n_distinct(minuteIntensitiesNarrow_merged$Id) #33
+nrow(minuteIntensitiesNarrow_merged) #1325580
+
+#minuteIntensitiesWide_merged
+n_distinct(minuteIntensitiesWide_merged$Id) #33
+nrow(minuteIntensitiesWide_merged) #21645
+
+#minuteMETsNarrow_merged
+head(minuteMETsNarrow_merged)
+n_distinct(minuteMETsNarrow_merged$Id) #33
+nrow(minuteMETsNarrow_merged) #1325580
+
+#minuteSleep_merged
+n_distinct(minuteSleep_merged$Id) #24
+nrow(minuteSleep_merged) #188521
+
+#minuteStepsNarrow_merged
+n_distinct(minuteStepsNarrow_merged$Id) #33
+nrow(minuteStepsNarrow_merged) #1325580
+
+#minuteStepsWide_merged
+n_distinct(minuteStepsWide_merged$Id) #33
+nrow(minuteStepsWide_merged) #21645
+
+#sleepDay_merged
+head(sleepDay_merged)
+n_distinct(sleepDay_merged$Id) #24
+nrow(sleepDay_merged) #413
+
+#weightLogInfo_merged
+head(weightLogInfo_merged)
+n_distinct(weightLogInfo_merged$Id) #8
+nrow(weightLogInfo_merged) #67
+```
+```{r}
+#get a summary for datasets of interest
+
+#Look at mean and sd.
+
+summary(dailyActivity_merged)
+#For the 33 users, the average total distance (moved per day?) is 5.490. Average calories (burnt?) are 2304. Average total steps (daily?) are 7638 steps. 
+#Median total distance is 5.245. Mean is slightly greater than median.
+#Median calories is 2134. Mean is greater than median.
+#Median total steps is 7406. Mean is greater than median.
+sd(dailyActivity_merged$TotalDistance) #3.924606
+sd(dailyActivity_merged$Calories) #718.1669
+sd(dailyActivity_merged$TotalSteps) #5087.151
+#all sd is large and mean is large except total distance, where sd is small and mean is small
+
+summary(hourlySteps_merged)
+#average step total is 320.2 per hour. Median is 40. Mean is greater than median.
+sd(hourlySteps_merged$StepTotal) #690.3842
+#sd is large and mean is large
+
+summary(hourlyCalories_merged)
+#average Calories are 97.39 per hour. Median is 83. Mean is greater than median.
+sd(hourlyCalories_merged$Calories) #60.70262
+#sd is large and mean is large
+
+summary(hourlyIntensities_merged)
+#average total intensity per hour is 12.04. Median is 3. Mean is greater than median.
+#average of the average intensity per hour is 0.2006. Median is 0.05. Mean is greater than median.
+sd(hourlyIntensities_merged$TotalIntensity) #21.13311
+sd(hourlyIntensities_merged$AverageIntensity) #0.3522185
+#sd is large and mean is large for total intensity.
+#sd is small and mean is small for average intensity.
+
+summary(minuteStepsNarrow_merged)
+#average Steps per minute is 5.336. Median is 0. Mean is greater than median.
+sd(minuteStepsNarrow_merged$Steps) #18.1283
+#sd is large and mean is small
+
+summary(minuteCaloriesNarrow_merged)
+#average Calories per minute is 1.6231. Median is 1.2176. Mean is slightly greater than median.
+sd(minuteCaloriesNarrow_merged$Calories) #1.410447
+#sd is low and mean is small.
+
+summary(minuteIntensitiesNarrow_merged)
+#average intensity per minute is 0.2006. Median is 0. Mean is slightly greater than median.
+sd(minuteIntensitiesNarrow_merged$Intensity) #0.5190227
+#sd is low and mean is small.
+
+summary(minuteMETsNarrow_merged)
+#average MET per minute is 14.69. This is considered excellent by NCBI, but it is an average. The median is 10, which is considered good by NCBI, but this is again not representative of all 33 users. Minimum is 0 and Maximum is 157. Mean is greater than median.
+sd(minuteMETsNarrow_merged$METs)
+#sd of METs is 12! Large sd and mean.
+
+summary(heartrate_seconds_merged)
+#average Value is 77.33, median is 73. mean is greater than median.
+sd(heartrate_seconds_merged$Value)
+#sd is 19.4045, large.
+
+summary(minuteSleep_merged)
+#average value is 1.096, median is 1. mean is slightly greater than median.
+sd(minuteSleep_merged$value)
+#sd is 0.32867, not clear whether this is small or large.
+
+summary(sleepDay_merged)
+#average value of total minutes asleep: 419.5, median is 433. Median is greater than mean!
+#average value of total time in bed: 458.6, median is 463. Median is greater than mean.
+sd(sleepDay_merged$TotalMinutesAsleep) #118.3447
+sd(sleepDay_merged$TotalTimeInBed) #127.1016
+
+summary(weightLogInfo_merged)
+#weightKg: mean: 72.04, median: 62.5; mean > median.
+#weightpounds: mean: 158.8, median: 137.8; mean > median.
+#fat: mean: 23.5, median: 23.5; mean = median. NAs - 65
+#BMI: mean: 25.19, median: 24.39; mean > median.
+sd(weightLogInfo_merged$WeightKg) #13.92321
+sd(weightLogInfo_merged$WeightPounds) #30.69542
+sd(weightLogInfo_merged$Fat) #NA
+sd(weightLogInfo_merged$BMI) #3.066963
+```
+
+```{r}
+#plot to find correlations: 
+
+##plotting total minutes asleep and total time in bed to see what the relationship is
+ggplot(data=cleaned_sleep) + geom_point(mapping=aes(x=TotalMinutesAsleep, y=TotalTimeInBed)) + labs(title="Total Minutes Asleep vs. Total Time in Bed")
+```
+There is a direct correlation between total time spent in bed and total minutes asleep. There are a few outliers who are spending significantly more time in bed than asleep.
+
+```{r}
+#very active minutes and BMI
+ggplot(activity_weight)+geom_point(mapping = aes(x=BMI, y=VeryActiveMinutes)) #For under 30 BMI, upward trend of very active minutes, but in the extreme BMI (above 40), the minutes are shorter
+ggplot(activity_weight)+geom_point(mapping = aes(x=TotalDistance, y=WeightPounds)) #the longer the total distance, the lower the weight (lbs)
+ggplot(activity_weight)+geom_bar(aes(x=BMI)) #trend of BMIs, most are under 30 :o
+```
+
+```{r}
+##How long does it take each user to fall asleep?
+##subtracting TotalMinutesAsleep from TotalTimeInBed to find time to fall asleep.
+cleaned_sleep$TimeToFallAsleep <- (cleaned_sleep$TotalTimeInBed-cleaned_sleep$TotalMinutesAsleep)
+```
+
+```{r}
+##need to look over the summary of how long it takes users to fall asleep on average
+print("Time to Fall Asleep Summarized")
+summary(cleaned_sleep$TimeToFallAsleep)
+```
+The average person takes 39 minutes to fall asleep. The average person should only take 15 to 20 minutes. By using a notification system to alert users about their designated bedtime, it would allow users to create a consistent sleep schedule which would help them decrease the amount it takes to fall asleep and give users a positive relationship with the app.
+
+```{r}
+##plotting TotalSteps vs. Calories to see what type of correlation there is
+ggplot(data = cleaned_activity, aes(x = TotalSteps, y = Calories, color = SedentaryMinutes)) + geom_point() + scale_color_gradientn(colors = wes_palette("GrandBudapest2", type = "continuous")) + geom_smooth(mapping=aes(x=TotalSteps, y=Calories), color = 'Purple', linewidth = 0.5, method=lm) + labs(title='Steps vs. Calories Burned in a Day',
+         subtitle=paste("Date Range: ", min_date_ca, " to ", max_date_ca))
+```
+There is a strong correlation between the number of steps a user takes and how many calories a user burns a day. The plot shows how the more steps a user takes, the more calories a user burns.
+
+```{r}
+##plotting TotalSteps vs. Total Minutes Asleep to see what type of correlation there is
+ggplot(data = activity_sleep, aes(x = TotalSteps, y = TotalMinutesAsleep, color = SedentaryMinutes)) + geom_point() + scale_color_gradientn(colors = wes_palette("GrandBudapest2", type = "continuous")) + geom_smooth(mapping=aes(x=TotalSteps, y=Calories), color = 'Purple', linewidth = 0.5, method=lm) + labs(title='Steps vs. Total Minutes Asleep',
+         subtitle=paste("Date Range: ", min_date_ca, " to ", max_date_ca))
+```
+
+```{r}
+##plotting weight in pounds vs. sedentary minutes
+ggplot(data=activity_weight) +
+    geom_jitter(mapping=aes(x=SedentaryMinutes,
+               y=WeightPounds)) +
+    geom_smooth(mapping=aes(x=SedentaryMinutes,
+               y=WeightPounds), color='seagreen1', linewidth=0.5) +
+    labs(title = "Weight (lbs) vs. Time Sedentary (mins)", subtitle=paste("Date Range: ", min_date_ca, " to ", max_date_ca), x='Time Sedentary (mins)',
+        y='Weight (lbs)')
+```
+With a sample size of only 8, more data is really needed to see a correlation. However, the preliminary plot indicated the more a person weighs, the more time they spend sedentary.
+
+```{r}
+##plotting average of total intensity versus time
+time_intensity <- hourly_intensity_steps %>%
+  drop_na() %>%
+  group_by(Time) %>%
+  summarize(mean_total_int = mean(TotalIntensity),
+            mean_steps = mean(StepTotal))
+
+ggplot(data = time_intensity) + 
+  geom_bar(aes(x = Time, y = mean_total_int, fill = mean_steps), stat = "identity") + 
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1)) +
+  labs(title = "Average Total Intensity by Time (mins)", 
+       x = "Time (mins)", y = "Mean Total Intensity")
+```
+The graph shows the majority of users are working out between 8am and 8pm. The highest peak of users working out is between 5pm and 7pm. This is usually after work for adults. Creating a way for users to get personalized workout reminders would create a rapport between the user and the app. Also, when their heartbeat is detected over their average resting heart rate, the app can prompt the user to record a workout which will allow them to track their personal fitness goals.
+
+```{r}
+#find who tracked vs who didn't:
+#left join with activity tracking so there are NAs for the IDs that didn't track their sleep, weight, heartrate.
+
+#activity vs sleep tracking:
+new_merge_act_slep <- merge(cleaned_activity, cleaned_sleep, by = "Id", all.x=TRUE)
+summary(new_merge_act_slep) #227 NAs for total minutes asleep, total sleep records, total time in bed, time to fall asleep
+
+#activity vs weight tracking:
+new_merge_act_weight <- merge(cleaned_activity, cleaned_weight, by = "Id", all.x=TRUE)
+summary(new_merge_act_weight) #693 NAs for weight kg, 693 NAs for weight pounds, 2707 NAs for Fat, 693 NAs for BMI, etc.
+
+#activity vs heartrate tracking:
+new_merge_act_heart <- merge(cleaned_activity, heartrate_seconds_merged, by = "Id", all.x=TRUE)
+summary(new_merge_act_heart) #data too large to count NAs
+
+#compare different tracking data with each other:
+#weight vs sleep tracking:
+new_merge_weight_slep <- merge(cleaned_weight, cleaned_sleep, by = "Id", all.x=TRUE)
+summary(new_merge_weight_slep) #26 NAs for total sleep records, total minutes asleep, total time in bed, time to fall asleep
+
+#weight vs heartrate tracking:
+new_merge_weight_heart <- merge(cleaned_weight, heartrate_seconds_merged, by = "Id", all.x=TRUE)
+summary(new_merge_weight_heart) #14691369 NAs for Fat
+```
+
+```{r}
+#graph the new merged datasets
+ggplot(data=new_merge_act_slep) +
+    geom_jitter(mapping=aes(x=ID,
+               y=WeightPounds)) +
+    geom_smooth(mapping=aes(x=ID,
+               y=WeightPounds), color='seagreen1', linewidth=0.5) +
+    labs(title = "Weight (lbs) vs. Sleep", subtitle=paste("Date Range: ", min_date_ca, " to ", max_date_ca), x='ID',
+        y='Weight (lbs)')
+```
+
+Recommendations Based on Analysis
+From the analysis, my recommendation would be to have sleep, heart rate, and weight recording notifications. This is because the data for these three data types are very low in volume compared to the automatic steps and calories and activity data. There should be an initiative to record these three data, and the notifications can be set to a convenient time. 
+
+Sleep data notification: As soon as user wakes up.
+Heart rate data notification: Automatic when there is a change in activity, sleep, etc.
+Weight data notification: As soon as user wakes up and records sleep data, once a week or once every two weeks, depending on user goals.
+
+Another recommendation and next steps is to brainstorm possible add-ons and incentives or technical improvements to focus on increasing sleep, weight, and heart rate tracking.
