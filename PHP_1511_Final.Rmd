@@ -1,0 +1,445 @@
+---
+title: "PHP_1511_Final"
+author: "Linda Wakamoto"
+date: "2024-08-14"
+output: html_document
+---
+```{r}
+title: "PHP1511 Final Project"
+author: "Linda Wakamoto"
+date: '2023-04-14'
+output: html_document
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(nhanesA) #DEMO = demographics, DIET = dietary, EXAM = examination, LAB = laboratory, Q = questionnaire
+nhanesTables(data_group='DEMO',year=2015)
+demo <- nhanes('DEMO_I')
+names(demo)
+table(demo$DMDHSEDU)
+cumsum(table(demo$DMDHSEDU))
+length(is.na(demo$DMDHSEDU))
+library(dplyr)
+
+#Age
+age_1999 <- nhanes('DEMO')[c('SEQN','RIDAGEYR')]
+age_2001 <- nhanes('DEMO_B')[c('SEQN','RIDAGEYR')]
+age_2003 <- nhanes('DEMO_C')[c('SEQN','RIDAGEYR')]
+age_2005 <- nhanes('DEMO_D')[c('SEQN','RIDAGEYR')]
+age_2007 <- nhanes('DEMO_E')[c('SEQN','RIDAGEYR')]
+age_2009 <- nhanes('DEMO_F')[c('SEQN','RIDAGEYR')]
+age_2011 <- nhanes('DEMO_G')[c('SEQN','RIDAGEYR')]
+age_2013 <- nhanes('DEMO_H')[c('SEQN','RIDAGEYR')]
+age_2015 <- nhanes('DEMO_I')[c('SEQN','RIDAGEYR')]
+age_2017 <- nhanes('DEMO_J')[c('SEQN','RIDAGEYR')]
+
+all_age <- bind_rows(age_1999, age_2001, age_2003, age_2005, age_2007, age_2009, age_2011, age_2013, age_2015, age_2017)
+colnames(all_age) <- c("PATIENT_ID","Age")
+```
+
+```{r}
+#male
+#1 for male, 2 for female
+gender_1999 <- nhanes('DEMO')[c('SEQN','RIAGENDR')]
+gender_2001 <- nhanes('DEMO_B')[c('SEQN','RIAGENDR')]
+gender_2003 <- nhanes('DEMO_C')[c('SEQN','RIAGENDR')]
+gender_2005 <- nhanes('DEMO_D')[c('SEQN','RIAGENDR')]
+gender_2007 <- nhanes('DEMO_E')[c('SEQN','RIAGENDR')]
+gender_2009 <- nhanes('DEMO_F')[c('SEQN','RIAGENDR')]
+gender_2011 <- nhanes('DEMO_G')[c('SEQN','RIAGENDR')]
+gender_2013 <- nhanes('DEMO_H')[c('SEQN','RIAGENDR')]
+gender_2015 <- nhanes('DEMO_I')[c('SEQN','RIAGENDR')]
+gender_2017 <- nhanes('DEMO_J')[c('SEQN','RIAGENDR')]
+
+all_gender <- bind_rows(gender_1999, gender_2001, gender_2003, gender_2005, gender_2007, gender_2009, gender_2011, gender_2013, gender_2015, gender_2017)
+colnames(all_gender) <- c("PATIENT_ID","Male")
+```
+
+```{r}
+#race
+#1 for Mexican American
+#2 for Other Hispanic
+#3 for Non-hispanic white
+#4 for Non-hispanic black
+#5 for Other Race - Including Multi-Racial
+race_1999 <- nhanes('DEMO')[c('SEQN','RIDRETH1')]
+race_2001 <- nhanes('DEMO_B')[c('SEQN','RIDRETH1')]
+race_2003 <- nhanes('DEMO_C')[c('SEQN','RIDRETH1')]
+race_2005 <- nhanes('DEMO_D')[c('SEQN','RIDRETH1')]
+race_2007 <- nhanes('DEMO_E')[c('SEQN','RIDRETH1')]
+race_2009 <- nhanes('DEMO_F')[c('SEQN','RIDRETH1')]
+race_2011 <- nhanes('DEMO_G')[c('SEQN','RIDRETH1')]
+race_2013 <- nhanes('DEMO_H')[c('SEQN','RIDRETH1')]
+race_2015 <- nhanes('DEMO_I')[c('SEQN','RIDRETH1')]
+race_2017 <- nhanes('DEMO_J')[c('SEQN','RIDRETH1')]
+
+all_race <- bind_rows(race_1999, race_2001, race_2003, race_2005, race_2007, race_2009, race_2011, race_2013, race_2015, race_2017)
+colnames(all_race) <- c("PATIENT_ID","Race")
+```
+
+```{r}
+#Education Level
+edu_1999 <- nhanes('DEMO')[c('SEQN','DMDEDUC2')]
+edu_2001 <- nhanes('DEMO_B')[c('SEQN','DMDEDUC2')]
+edu_2003 <- nhanes('DEMO_C')[c('SEQN','DMDEDUC2')]
+edu_2005 <- nhanes('DEMO_D')[c('SEQN','DMDEDUC2')]
+edu_2007 <- nhanes('DEMO_E')[c('SEQN','DMDEDUC2')]
+edu_2009 <- nhanes('DEMO_F')[c('SEQN','DMDEDUC2')]
+edu_2011 <- nhanes('DEMO_G')[c('SEQN','DMDEDUC2')]
+edu_2013 <- nhanes('DEMO_H')[c('SEQN','DMDEDUC2')]
+edu_2015 <- nhanes('DEMO_I')[c('SEQN','DMDEDUC2')]
+edu_2017 <- nhanes('DEMO_J')[c('SEQN','DMDEDUC2')]
+
+all_edu <- bind_rows(edu_1999, edu_2001, edu_2003, edu_2005, edu_2007, edu_2009, edu_2011, edu_2013, edu_2015, edu_2017)
+colnames(all_edu) <- c("PATIENT_ID","Education level")
+```
+
+```{r}
+#ratio of family income to poverty
+ratio_1999 <- nhanes('DEMO')[c('SEQN','INDFMPIR')]
+ratio_2001 <- nhanes('DEMO_B')[c('SEQN','INDFMPIR')]
+ratio_2003 <- nhanes('DEMO_C')[c('SEQN','INDFMPIR')]
+ratio_2005 <- nhanes('DEMO_D')[c('SEQN','INDFMPIR')]
+ratio_2007 <- nhanes('DEMO_E')[c('SEQN','INDFMPIR')]
+ratio_2009 <- nhanes('DEMO_F')[c('SEQN','INDFMPIR')]
+ratio_2011 <- nhanes('DEMO_G')[c('SEQN','INDFMPIR')]
+ratio_2013 <- nhanes('DEMO_H')[c('SEQN','INDFMPIR')]
+ratio_2015 <- nhanes('DEMO_I')[c('SEQN','INDFMPIR')]
+ratio_2017 <- nhanes('DEMO_J')[c('SEQN','INDFMPIR')]
+
+all_ratio <- bind_rows(ratio_1999, ratio_2001, ratio_2003, ratio_2005, ratio_2007, ratio_2009, ratio_2011, ratio_2013, ratio_2015, ratio_2017)
+colnames(all_ratio) <- c("PATIENT_ID","Ratio of family income to poverty")
+```
+
+```{r}
+#alcohol use
+alc_1999 <- nhanes('ALQ')[c('SEQN','ALQ110')]
+alc_2001 <- nhanes('ALQ_B')[c('SEQN','ALQ110')]
+alc_2003 <- nhanes('ALQ_C')[c('SEQN','ALQ110')]
+alc_2005 <- nhanes('ALQ_D')[c('SEQN','ALQ110')]
+alc_2007 <- nhanes('ALQ_E')[c('SEQN','ALQ110')]
+alc_2009 <- nhanes('ALQ_F')[c('SEQN','ALQ110')]
+alc_2011 <- nhanes('ALQ_G')[c('SEQN','ALQ110')]
+alc_2013 <- nhanes('ALQ_H')[c('SEQN','ALQ110')]
+alc_2015 <- nhanes('ALQ_I')[c('SEQN','ALQ110')]
+alc_2017 <- nhanes('ALQ_J')[c('SEQN','ALQ111')] 
+
+all_alc <- bind_rows(alc_1999, alc_2001, alc_2003, alc_2005, alc_2007, alc_2009, alc_2011, alc_2013, alc_2015, alc_2017)
+colnames(all_alc) <- c("PATIENT_ID","Alcohol use")
+```
+
+```{r}
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyr)
+library(tableone)
+library(gtsummary)
+```
+
+Upload data
+```{r}
+data <- read.csv('nhanes_data.csv')
+
+# remove missing data from lead or hypertension
+data <- data %>% drop_na(Lead..ug.dl.)
+data <- data %>% drop_na(Hypertension)
+
+# 18+ age only
+data <- subset(data, Age >=20 )
+
+# omit education, ratio, BMI, (alc, smoking)
+data <- data %>% drop_na(all_edu)
+data <- data %>% drop_na(BMI..kg.m.2.)
+data <- data %>% drop_na(Ratio.of.family.income.to.poverty) # 38424 data existing...too much missing data with alc and smoking
+
+# make categorical variables factors
+factors <- c('Alcohol.use', 'all_edu', 'Male', 'Race', 'all_smoking', 'Hypertension')
+data[,factors] <- lapply(data[,factors], factor)
+```
+
+Make stratified tables (Baseline)
+```{r}
+summary(data)
+# q1: <0.830; q2: 0.830 - 1.772; q3: 1.772-2.140; q4: 2.140+
+quant <- cut(data$Lead..ug.dl., quantile(data$Lead..ug.dl., probs=0:4/4), include.lowest=TRUE)
+data <- data.frame(data, quant)
+data$quant <- as.factor(data$quant)
+baseline_table1 <- tbl_summary(data)
+baseline_table2 <- tbl_summary(data=data, by='quant') %>%
+  add_p()
+
+
+merged <- tbl_merge(tbls=list(baseline_table1, baseline_table2),
+                    tab_spanner = c("**All Data**", "**Quantiles**"))
+merged
+```
+
+Develop logistic regression models - lead
+```{r}
+lead1 <- glm(data=data, formula=Hypertension~Lead..ug.dl., family=binomial(link='logit')) %>%
+  tbl_regression(exponentiate=TRUE, include=c(Lead..ug.dl.))
+
+lead2 <- glm(data=data, formula=Hypertension~Lead..ug.dl.+Age+Male+Race, family=binomial(link='logit')) %>%
+  tbl_regression(exponentiate=TRUE, include=c(Lead..ug.dl.))
+
+lead3 <- glm(data=data, formula=Hypertension~Lead..ug.dl.+Age+Male+Race+all_edu+BMI..kg.m.2.+Ratio.of.family.income.to.poverty+all_smoking+Alcohol.use, family=binomial(link='logit')) %>%
+  tbl_regression(exponentiate=TRUE, include=c(Lead..ug.dl.))
+
+lead_mod <- tbl_merge(tbls=list(lead1, lead2, lead3), tab_spanner=c('Model 1', 'Model 2', 'Model 3'))
+lead_mod
+```
+quartiles
+```{r}
+quant11 <- glm(data=data, formula=Hypertension~Lead..ug.dl., family=binomial(link='logit'), subset=quant=='[0.05,0.83]') %>%
+  tbl_regression(exponentiate=TRUE, include=c(Lead..ug.dl.))
+quant21 <- glm(data=data, formula=Hypertension~Lead..ug.dl.+Age+Male+Race, family=binomial(link='logit'), subset=quant=='[0.05,0.83]') %>%
+  tbl_regression(exponentiate=TRUE, include=c(Lead..ug.dl.))
+quant31 <- glm(data=data, formula=Hypertension~Lead..ug.dl.+Age+Male+Race+all_edu+BMI..kg.m.2.+Ratio.of.family.income.to.poverty+all_smoking+Alcohol.use, family=binomial(link='logit'), subset=quant=='[0.05,0.83]') %>%
+  tbl_regression(exponentiate=TRUE, include=c(Lead..ug.dl.))
+quant_mod1 <- tbl_merge(tbls=list(quant11, quant21, quant31), tab_spanner=c('Model 1', 'Model 2', 'Model 3'))
+
+
+quant12 <- glm(data=data, formula=Hypertension~Lead..ug.dl., family=binomial(link='logit'), subset=quant=='(0.83,1.33]') %>%
+  tbl_regression(exponentiate=TRUE, include=c(Lead..ug.dl.))
+quant22 <- glm(data=data, formula=Hypertension~Lead..ug.dl.+Age+Male+Race, family=binomial(link='logit'), subset=quant=='(0.83,1.33]') %>%
+  tbl_regression(exponentiate=TRUE, include=c(Lead..ug.dl.))
+quant32 <- glm(data=data, formula=Hypertension~Lead..ug.dl.+Age+Male+Race+all_edu+BMI..kg.m.2.+Ratio.of.family.income.to.poverty+all_smoking+Alcohol.use, family=binomial(link='logit'), subset=quant=='(0.83,1.33]') %>%
+  tbl_regression(exponentiate=TRUE, include=c(Lead..ug.dl.))
+quant_mod2 <- tbl_merge(tbls=list(quant12, quant22, quant32), tab_spanner=c('Model 1', 'Model 2', 'Model 3'))
+
+
+quant13 <- glm(data=data, formula=Hypertension~Lead..ug.dl., family=binomial(link='logit'), subset=quant=='(1.33,2.14]') %>%
+  tbl_regression(exponentiate=TRUE, include=c(Lead..ug.dl.))
+quant23 <- glm(data=data, formula=Hypertension~Lead..ug.dl.+Age+Male+Race, family=binomial(link='logit'), subset=quant=='(1.33,2.14]') %>%
+  tbl_regression(exponentiate=TRUE, include=c(Lead..ug.dl.))
+quant33 <- glm(data=data, formula=Hypertension~Lead..ug.dl.+Age+Male+Race+all_edu+BMI..kg.m.2.+Ratio.of.family.income.to.poverty+all_smoking+Alcohol.use, family=binomial(link='logit'), subset=quant=='(1.33,2.14]') %>%
+  tbl_regression(exponentiate=TRUE, include=c(Lead..ug.dl.))
+quant_mod3 <- tbl_merge(tbls=list(quant13, quant23, quant33), tab_spanner=c('Model 1', 'Model 2', 'Model 3'))
+
+
+quant14 <- glm(data=data, formula=Hypertension~Lead..ug.dl., family=binomial(link='logit'), subset=quant=='(2.14,61.3]') %>%
+  tbl_regression(exponentiate=TRUE, include=c(Lead..ug.dl.))
+quant24 <- glm(data=data, formula=Hypertension~Lead..ug.dl.+Age+Male+Race, family=binomial(link='logit'), subset=quant=='(2.14,61.3]') %>%
+  tbl_regression(exponentiate=TRUE, include=c(Lead..ug.dl.))
+quant34 <- glm(data=data, formula=Hypertension~Lead..ug.dl.+Age+Male+Race+all_edu+BMI..kg.m.2.+Ratio.of.family.income.to.poverty+all_smoking+Alcohol.use, family=binomial(link='logit'), subset=quant=='(2.14,61.3]') %>%
+  tbl_regression(exponentiate=TRUE,include=c(Lead..ug.dl.))
+quant_mod4 <- tbl_merge(tbls=list(quant14, quant24, quant34), tab_spanner=c('Model 1', 'Model 2', 'Model 3'))
+
+```
+gender
+```{r}
+male11 <- glm(data=data, formula=Hypertension~Lead..ug.dl., family=binomial(link='logit'), subset=Male==1) %>%
+  tbl_regression(exponentiate=TRUE, include=c(Lead..ug.dl.))
+male21 <- glm(data=data, formula=Hypertension~Lead..ug.dl.+Age+Race, family=binomial(link='logit'), subset=Male==1) %>%
+  tbl_regression(exponentiate=TRUE, include=c(Lead..ug.dl.))
+male31 <- glm(data=data, formula=Hypertension~Lead..ug.dl.+Age+Race+all_edu+BMI..kg.m.2.+Ratio.of.family.income.to.poverty+all_smoking+Alcohol.use, family=binomial(link='logit'), subset=Male==1) %>%
+  tbl_regression(exponentiate=TRUE,include=c(Lead..ug.dl.))
+male_mod1 <- tbl_merge(tbls=list(male11, male21, male31), tab_spanner=c('Model 1', 'Model 2', 'Model 3'))
+
+
+male12 <- glm(data=data, formula=Hypertension~Lead..ug.dl., family=binomial(link='logit'), subset=Male==2) %>%
+  tbl_regression(exponentiate=TRUE,include=c(Lead..ug.dl.))
+male22 <- glm(data=data, formula=Hypertension~Lead..ug.dl.+Age+Race, family=binomial(link='logit'), subset=Male==2) %>%
+  tbl_regression(exponentiate=TRUE,include=c(Lead..ug.dl.))
+male32 <- glm(data=data, formula=Hypertension~Lead..ug.dl.+Age+Race+all_edu+BMI..kg.m.2.+Ratio.of.family.income.to.poverty+all_smoking+Alcohol.use, family=binomial(link='logit'), subset=Male==2) %>%
+  tbl_regression(exponentiate=TRUE,include=c(Lead..ug.dl.))
+male_mod2 <- tbl_merge(tbls=list(male12, male22, male32), tab_spanner=c('Model 1', 'Model 2', 'Model 3'))
+
+```
+
+```{r}
+race11 <- glm(data=data, formula=Hypertension~Lead..ug.dl., family=binomial(link='logit'), subset=Race==1) %>%
+  tbl_regression(exponentiate=TRUE,include=c(Lead..ug.dl.))
+race21 <- glm(data=data, formula=Hypertension~Lead..ug.dl.+Age+Male, family=binomial(link='logit'), subset=Race==1) %>%
+  tbl_regression(exponentiate=TRUE,include=c(Lead..ug.dl.))
+race31 <- glm(data=data, formula=Hypertension~Lead..ug.dl.+Age+Male+all_edu+BMI..kg.m.2.+Ratio.of.family.income.to.poverty+all_smoking+Alcohol.use, family=binomial(link='logit'), subset=Race==1) %>%
+  tbl_regression(exponentiate=TRUE,include=c(Lead..ug.dl.),)
+race_mod1 <- tbl_merge(tbls=list(race11, race21, race31), tab_spanner=c('Model 1', 'Model 2', 'Model 3'))
+
+
+race12 <- glm(data=data, formula=Hypertension~Lead..ug.dl., family=binomial(link='logit'), subset=Race==2) %>%
+  tbl_regression(exponentiate=TRUE,include=c(Lead..ug.dl.))
+race22 <- glm(data=data, formula=Hypertension~Lead..ug.dl.+Age+Male, family=binomial(link='logit'), subset=Race==2) %>%
+  tbl_regression(exponentiate=TRUE,include=c(Lead..ug.dl.))
+race32 <- glm(data=data, formula=Hypertension~Lead..ug.dl.+Age+Male+all_edu+BMI..kg.m.2.+Ratio.of.family.income.to.poverty+all_smoking+Alcohol.use, family=binomial(link='logit'), subset=Race==2) %>%
+  tbl_regression(exponentiate=TRUE,include=c(Lead..ug.dl.))
+race_mod2 <- tbl_merge(tbls=list(race12, race22, race32), tab_spanner=c('Model 1', 'Model 2', 'Model 3'))
+
+
+race13 <- glm(data=data, formula=Hypertension~Lead..ug.dl., family=binomial(link='logit'), subset=Race==3) %>%
+  tbl_regression(exponentiate=TRUE,include=c(Lead..ug.dl.))
+race23 <- glm(data=data, formula=Hypertension~Lead..ug.dl.+Age+Male, family=binomial(link='logit'), subset=Race==3) %>%
+  tbl_regression(exponentiate=TRUE,include=c(Lead..ug.dl.))
+race33 <- glm(data=data, formula=Hypertension~Lead..ug.dl.+Age+Male+all_edu+BMI..kg.m.2.+Ratio.of.family.income.to.poverty+all_smoking+Alcohol.use, family=binomial(link='logit'), subset=Race==3) %>%
+  tbl_regression(exponentiate=TRUE,include=c(Lead..ug.dl.))
+race_mod3 <- tbl_merge(tbls=list(race13, race23, race33), tab_spanner=c('Model 1', 'Model 2', 'Model 3'))
+
+
+race14 <- glm(data=data, formula=Hypertension~Lead..ug.dl., family=binomial(link='logit'), subset=Race==4) %>%
+  tbl_regression(exponentiate=TRUE,include=c(Lead..ug.dl.))
+race24 <- glm(data=data, formula=Hypertension~Lead..ug.dl.+Age+Male, family=binomial(link='logit'), subset=Race==4) %>%
+  tbl_regression(exponentiate=TRUE,include=c(Lead..ug.dl.))
+race34 <- glm(data=data, formula=Hypertension~Lead..ug.dl.+Age+Male+all_edu+BMI..kg.m.2.+Ratio.of.family.income.to.poverty+all_smoking+Alcohol.use, family=binomial(link='logit'), subset=Race==4) %>%
+  tbl_regression(exponentiate=TRUE,include=c(Lead..ug.dl.))
+race_mod4 <- tbl_merge(tbls=list(race14, race24, race34), tab_spanner=c('Model 1', 'Model 2', 'Model 3'))
+
+
+race15 <- glm(data=data, formula=Hypertension~Lead..ug.dl., family=binomial(link='logit'), subset=Race==5) %>%
+  tbl_regression(exponentiate=TRUE,include=c(Lead..ug.dl.))
+race25 <- glm(data=data, formula=Hypertension~Lead..ug.dl.+Age+Male, family=binomial(link='logit'), subset=Race==5) %>%
+  tbl_regression(exponentiate=TRUE,include=c(Lead..ug.dl.))
+race35 <- glm(data=data, formula=Hypertension~Lead..ug.dl.+Age+Male+all_edu+BMI..kg.m.2.+Ratio.of.family.income.to.poverty+all_smoking+Alcohol.use, family=binomial(link='logit'), subset=Race==5) %>%
+  tbl_regression(exponentiate=TRUE,include=c(Lead..ug.dl.))
+race_mod5 <- tbl_merge(tbls=list(race15, race25, race35), tab_spanner=c('Model 1', 'Model 2', 'Model 3'))
+```
+
+```{r}
+bmi11 <- glm(data=data, formula=Hypertension~Lead..ug.dl., family=binomial(link='logit'), subset=BMI..kg.m.2.>=30) %>%
+  tbl_regression(exponentiate=TRUE,include=c(Lead..ug.dl.))
+bmi21 <- glm(data=data, formula=Hypertension~Lead..ug.dl.+Age+Male+Race, family=binomial(link='logit'), subset=BMI..kg.m.2.>=30) %>%
+  tbl_regression(exponentiate=TRUE,include=c(Lead..ug.dl.))
+bmi31 <- glm(data=data, formula=Hypertension~Lead..ug.dl.+Age+Male+Race+all_edu+Ratio.of.family.income.to.poverty+all_smoking+Alcohol.use, family=binomial(link='logit'), subset=BMI..kg.m.2.>=30) %>%
+  tbl_regression(exponentiate=TRUE,include=c(Lead..ug.dl.))
+bmi_mod1 <- tbl_merge(tbls=list(bmi11, bmi21, bmi31), tab_spanner=c('Model 1', 'Model 2', 'Model 3'))
+
+
+bmi12 <- glm(data=data, formula=Hypertension~Lead..ug.dl., family=binomial(link='logit'), subset=(BMI..kg.m.2.>25 & BMI..kg.m.2.<=30)) %>%
+  tbl_regression(exponentiate=TRUE,include=c(Lead..ug.dl.))
+bmi22 <- glm(data=data, formula=Hypertension~Lead..ug.dl.+Age+Male+Race, family=binomial(link='logit'), subset=(BMI..kg.m.2.>25 & BMI..kg.m.2.<=30)) %>%
+  tbl_regression(exponentiate=TRUE,include=c(Lead..ug.dl.))
+bmi32 <- glm(data=data, formula=Hypertension~Lead..ug.dl.+Age+Male+Race+all_edu+Ratio.of.family.income.to.poverty+all_smoking+Alcohol.use, family=binomial(link='logit'), subset=(BMI..kg.m.2.>25 & BMI..kg.m.2.<=30)) %>%
+  tbl_regression(exponentiate=TRUE,include=c(Lead..ug.dl.))
+bmi_mod2 <- tbl_merge(tbls=list(bmi12, bmi22, bmi32), tab_spanner=c('Model 1', 'Model 2', 'Model 3'))
+
+
+bmi13 <- glm(data=data, formula=Hypertension~Lead..ug.dl., family=binomial(link='logit'), subset=BMI..kg.m.2.<=25) %>%
+  tbl_regression(exponentiate=TRUE,include=c(Lead..ug.dl.))
+bmi23 <- glm(data=data, formula=Hypertension~Lead..ug.dl.+Age+Male+Race, family=binomial(link='logit'), subset=BMI..kg.m.2.<=25) %>%
+  tbl_regression(exponentiate=TRUE,include=c(Lead..ug.dl.))
+bmi33 <- glm(data=data, formula=Hypertension~Lead..ug.dl.+Age+Male+Race+all_edu+Ratio.of.family.income.to.poverty+all_smoking+Alcohol.use, family=binomial(link='logit'), subset=BMI..kg.m.2.<=25) %>%
+  tbl_regression(exponentiate=TRUE,include=c(Lead..ug.dl.))
+bmi_mod3 <- tbl_merge(tbls=list(bmi13, bmi23, bmi33), tab_spanner=c('Model 1', 'Model 2', 'Model 3'))
+```
+
+```{r}
+final_summary <- tbl_stack(tbls=list(lead_mod, quant_mod1, quant_mod2, quant_mod3, quant_mod4, male_mod1, male_mod2, race_mod1, race_mod2, race_mod3, race_mod4, race_mod5, bmi_mod1, bmi_mod2, bmi_mod3))
+final_summary
+```
+## Making Table 3
+
+Per BLL increase
+```{r}
+lead1_t3 <- lm(data=data, formula=avg_sys~Lead..ug.dl.) %>%
+  tbl_regression(include=c(Lead..ug.dl.))
+
+lead2_t3 <- lm(data=data, formula=avg_sys~Lead..ug.dl.+Age+Male+Race) %>%
+  tbl_regression(include=c(Lead..ug.dl.))
+
+lead3_t3 <- lm(data=data, formula=avg_sys~Lead..ug.dl.+Age+Race+Male+all_edu+BMI..kg.m.2.+Ratio.of.family.income.to.poverty+all_smoking+Alcohol.use) %>%
+  tbl_regression(include=c(Lead..ug.dl.))
+
+lead_mod_t3 <- tbl_merge(tbls=list(lead1_t3, lead2_t3, lead3_t3), tab_spanner=c('Model 1', 'Model 2', 'Model 3'))
+lead_mod_t3
+```
+
+Stratified by race and sex
+```{r}
+#Race 1 Male 1
+m_race11_t3 <- lm(data=data, formula=avg_sys~Lead..ug.dl., subset=Race==1 & Male==1) %>%
+  tbl_regression(include=c(Lead..ug.dl.))
+m_race21_t3 <- lm(data=data, formula=avg_sys~Lead..ug.dl.+Age, subset=Race==1 & Male==1) %>%
+  tbl_regression(include=c(Lead..ug.dl.))
+m_race31_t3 <- lm(data=data, formula=avg_sys~Lead..ug.dl.+Age+all_edu+BMI..kg.m.2.+Ratio.of.family.income.to.poverty+all_smoking+Alcohol.use, subset=Race==1 & Male==1) %>%
+  tbl_regression(include=c(Lead..ug.dl.),)
+m_race_mod1_t3 <- tbl_merge(tbls=list(m_race11_t3, m_race21_t3, m_race31_t3), tab_spanner=c('Model 1', 'Model 2', 'Model 3'))
+
+#Race 1 Male 2
+f_race11_t3 <- lm(data=data, formula=avg_sys~Lead..ug.dl., subset=Race==1 & Male==2) %>%
+  tbl_regression(include=c(Lead..ug.dl.))
+f_race21_t3 <- lm(data=data, formula=avg_sys~Lead..ug.dl.+Age, subset=Race==1 & Male==2) %>%
+  tbl_regression(include=c(Lead..ug.dl.))
+f_race31_t3 <- lm(data=data, formula=avg_sys~Lead..ug.dl.+Age+all_edu+BMI..kg.m.2.+Ratio.of.family.income.to.poverty+all_smoking+Alcohol.use, subset=Race==1 & Male==2) %>%
+  tbl_regression(include=c(Lead..ug.dl.),)
+f_race_mod1_t3 <- tbl_merge(tbls=list(f_race11_t3, f_race21_t3, f_race31_t3), tab_spanner=c('Model 1', 'Model 2', 'Model 3'))
+
+#Race 2 Male 1
+m_race12_t3 <- lm(data=data, formula=avg_sys~Lead..ug.dl., subset=Race==2 & Male==1) %>%
+  tbl_regression(include=c(Lead..ug.dl.))
+m_race22_t3 <- lm(data=data, formula=avg_sys~Lead..ug.dl.+Age, subset=Race==2 & Male==1) %>%
+  tbl_regression(include=c(Lead..ug.dl.))
+m_race32_t3 <- lm(data=data, formula=avg_sys~Lead..ug.dl.+Age+all_edu+BMI..kg.m.2.+Ratio.of.family.income.to.poverty+all_smoking+Alcohol.use, subset=Race==2 & Male==1) %>%
+  tbl_regression(include=c(Lead..ug.dl.),)
+m_race_mod2_t3 <- tbl_merge(tbls=list(m_race12_t3, m_race22_t3, m_race32_t3), tab_spanner=c('Model 1', 'Model 2', 'Model 3'))
+
+#Race 2 Male 2
+f_race12_t3 <- lm(data=data, formula=avg_sys~Lead..ug.dl., subset=Race==2 & Male==2) %>%
+  tbl_regression(include=c(Lead..ug.dl.))
+f_race22_t3 <- lm(data=data, formula=avg_sys~Lead..ug.dl.+Age, subset=Race==2 & Male==2) %>%
+  tbl_regression(include=c(Lead..ug.dl.))
+f_race32_t3 <- lm(data=data, formula=avg_sys~Lead..ug.dl.+Age+all_edu+BMI..kg.m.2.+Ratio.of.family.income.to.poverty+all_smoking+Alcohol.use, subset=Race==2 & Male==2) %>%
+  tbl_regression(include=c(Lead..ug.dl.),)
+f_race_mod2_t3 <- tbl_merge(tbls=list(f_race12_t3, f_race22_t3, f_race32_t3), tab_spanner=c('Model 1', 'Model 2', 'Model 3'))
+
+#Race 3 Male 1
+m_race13_t3 <- lm(data=data, formula=avg_sys~Lead..ug.dl., subset=Race==3 & Male==1) %>%
+  tbl_regression(include=c(Lead..ug.dl.))
+m_race23_t3 <- lm(data=data, formula=avg_sys~Lead..ug.dl.+Age, subset=Race==3 & Male==1) %>%
+  tbl_regression(include=c(Lead..ug.dl.))
+m_race33_t3 <- lm(data=data, formula=avg_sys~Lead..ug.dl.+Age+all_edu+BMI..kg.m.2.+Ratio.of.family.income.to.poverty+all_smoking+Alcohol.use, subset=Race==3 & Male==1) %>%
+  tbl_regression(include=c(Lead..ug.dl.),)
+m_race_mod3_t3 <- tbl_merge(tbls=list(m_race13_t3, m_race23_t3, m_race33_t3), tab_spanner=c('Model 1', 'Model 2', 'Model 3'))
+
+#Race 3 Male 2
+f_race13_t3 <- lm(data=data, formula=avg_sys~Lead..ug.dl., subset=Race==3 & Male==2) %>%
+  tbl_regression(include=c(Lead..ug.dl.))
+f_race23_t3 <- lm(data=data, formula=avg_sys~Lead..ug.dl.+Age, subset=Race==3 & Male==2) %>%
+  tbl_regression(include=c(Lead..ug.dl.))
+f_race33_t3 <- lm(data=data, formula=avg_sys~Lead..ug.dl.+Age+all_edu+BMI..kg.m.2.+Ratio.of.family.income.to.poverty+all_smoking+Alcohol.use, subset=Race==3 & Male==2) %>%
+  tbl_regression(include=c(Lead..ug.dl.),)
+f_race_mod3_t3 <- tbl_merge(tbls=list(f_race13_t3, f_race23_t3, f_race33_t3), tab_spanner=c('Model 1', 'Model 2', 'Model 3'))
+
+#Race 4 Male 1
+m_race14_t3 <- lm(data=data, formula=avg_sys~Lead..ug.dl., subset=Race==4 & Male==1) %>%
+  tbl_regression(include=c(Lead..ug.dl.))
+m_race24_t3 <- lm(data=data, formula=avg_sys~Lead..ug.dl.+Age, subset=Race==4 & Male==1) %>%
+  tbl_regression(include=c(Lead..ug.dl.))
+m_race34_t3 <- lm(data=data, formula=avg_sys~Lead..ug.dl.+Age+all_edu+BMI..kg.m.2.+Ratio.of.family.income.to.poverty+all_smoking+Alcohol.use, subset=Race==4 & Male==1) %>%
+  tbl_regression(include=c(Lead..ug.dl.),)
+m_race_mod4_t3 <- tbl_merge(tbls=list(m_race14_t3, m_race24_t3, m_race34_t3), tab_spanner=c('Model 1', 'Model 2', 'Model 3'))
+
+#Race 4 Male 2
+f_race14_t3 <- lm(data=data, formula=avg_sys~Lead..ug.dl., subset=Race==4 & Male==2) %>%
+  tbl_regression(include=c(Lead..ug.dl.))
+f_race24_t3 <- lm(data=data, formula=avg_sys~Lead..ug.dl.+Age, subset=Race==4 & Male==2) %>%
+  tbl_regression(include=c(Lead..ug.dl.))
+f_race34_t3 <- lm(data=data, formula=avg_sys~Lead..ug.dl.+Age+all_edu+BMI..kg.m.2.+Ratio.of.family.income.to.poverty+all_smoking+Alcohol.use, subset=Race==4 & Male==2) %>%
+  tbl_regression(include=c(Lead..ug.dl.),)
+f_race_mod4_t3 <- tbl_merge(tbls=list(f_race14_t3, f_race24_t3, f_race34_t3), tab_spanner=c('Model 1', 'Model 2', 'Model 3'))
+
+#Race 5 Male 1
+m_race15_t3 <- lm(data=data, formula=avg_sys~Lead..ug.dl., subset=Race==5 & Male==1) %>%
+  tbl_regression(include=c(Lead..ug.dl.))
+m_race25_t3 <- lm(data=data, formula=avg_sys~Lead..ug.dl.+Age, subset=Race==5 & Male==1) %>%
+  tbl_regression(include=c(Lead..ug.dl.))
+m_race35_t3 <- lm(data=data, formula=avg_sys~Lead..ug.dl.+Age+all_edu+BMI..kg.m.2.+Ratio.of.family.income.to.poverty+all_smoking+Alcohol.use, subset=Race==5 & Male==1) %>%
+  tbl_regression(include=c(Lead..ug.dl.),)
+m_race_mod5_t3 <- tbl_merge(tbls=list(m_race15_t3, m_race25_t3, m_race35_t3), tab_spanner=c('Model 1', 'Model 2', 'Model 3'))
+
+#Race 5 Male 2
+f_race15_t3 <- lm(data=data, formula=avg_sys~Lead..ug.dl., subset=Race==5 & Male==2) %>%
+  tbl_regression(include=c(Lead..ug.dl.))
+f_race25_t3 <- lm(data=data, formula=avg_sys~Lead..ug.dl.+Age, subset=Race==5 & Male==2) %>%
+  tbl_regression(include=c(Lead..ug.dl.))
+f_race35_t3 <- lm(data=data, formula=avg_sys~Lead..ug.dl.+Age+all_edu+BMI..kg.m.2.+Ratio.of.family.income.to.poverty+all_smoking+Alcohol.use, subset=Race==5 & Male==2) %>%
+  tbl_regression(include=c(Lead..ug.dl.),)
+f_race_mod5_t3 <- tbl_merge(tbls=list(f_race15_t3, f_race25_t3, f_race35_t3), tab_spanner=c('Model 1', 'Model 2', 'Model 3'))
+```
+
+```{r}
+final_summary_t3 <- tbl_stack(tbls=list(lead_mod_t3, m_race_mod1_t3, m_race_mod2_t3, m_race_mod3_t3, m_race_mod4_t3, m_race_mod5_t3, f_race_mod1_t3, f_race_mod2_t3, f_race_mod3_t3, f_race_mod4_t3, f_race_mod5_t3))
+final_summary_t3
+```
+
