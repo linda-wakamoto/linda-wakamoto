@@ -2,4 +2,9 @@
 Table of Contents:
 1. Google_DA_Case_Study.Rmd: This is my case study that I completed for the Google Data Analytics Course. I analyzed Fitbit user data to provide app update recommendations for a fitness app company called Bellabeats.
 2. SIBS_Infectious_Diseases_Project.Rmd: This is another undergraduate research project that I completed with fellow undergraduates at Boston University's Summer Institute of Biostatistics and Data Science Program. We analyzed Ukranian adult data to find a possible correlation between migrant status and drug-resistant Tuberculosis prevalence.
-4. 
+3. PHP_1511_Final.Rmd: This is my final project for the Applied Regression Analysis course that I took at Brown University. My partner and I used data and replicated the analysis from the article “Association Between Blood Lead Level With High Blood Pressure in US (NHANES 1999–2018)”. We cleaned the data, extracted the relevant variables, merged data from consecutive years to one overall variable, did regression analysis, created tables, and stratified tables.
+4. PHP_1511_Assignment_1.Rmd: This was the Applied Regression Analysis course Assignment 1, Simple Linear Regression. Concepts include: loading and visualizing data, simple linear regression, and interpreting coefficients.
+5. PHP_1511_Assignment_2.Rmd: This was the Applied Regression Analysis course Assignment 2, Inference and Diagnostics. Concepts include: multiple linear regression, inference in regression, and diagnostics.
+6. PHP_1511_Assignment_3.Rmd: This was the Applied Regression Analysis course Assignment 3, Transformations, Prediction, Model Selection. Concepts include: transformations, interactions, test-train splits, model comparison, and stepwise selection.
+7. PHP_1511_Assignment_4.Rmd: This was the Applied Regression Analysis course Assignment 4, Logistic Regression. Concepts include: stepwise selection, model validation, logistic regression, model evaluation for binary outcomes.
+8. PHP_1511_Assignment_5.Rmd: This was the Applied Regression Analysis course Assignment 5, Poisson Regression and Survival Analysis. Concepts include: developing a model, fitting the model, and assessing model fit.
