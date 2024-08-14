@@ -1,0 +1,137 @@
+---
+title: "SIBS_Infectious_Diseases_Project"
+author: "Linda Wakamoto"
+date: "2024-08-14"
+output: html_document
+---
+```{r}
+#SIBS 2022 Ukraine Tuberculosis Research Project
+#Marley DeSimone, Caroline Ash, Corina Ramont, Linda Wakamoto
+
+#Set up data
+setwd("Users/marleydesimone/infectious-diseases/Data")
+load(file="super_cleaned_cases_data.Rda")
+head(cases_mod)
+
+#subset so we take out cases where result is contaminated 
+ukr<-subset(cases_mod,cases_mod$DST.result.R=="Resistant"|cases_mod$DST.result.R=="Sensitive")
+
+#comparing sex
+tablesex<-table(ukr$migrant_refugee,ukr$Sex)
+prop.table(tablesex,1)
+chisq.test(ukr$migrant_refugee,ukr$Sex)
+
+#comparing age
+ukrainemigrant<-subset(ukr,ukr$migrant_refugee=="Yes")
+mean(ukrainemigrant$Age)
+ukrainenonmigrant<-subset(ukr,ukr$migrant_refugee=="No")
+mean(ukrainenonmigrant$Age)
+
+#comparing urban/rural
+tableurban<-table(ukr$migrant_refugee,ukr$Urban.Rural)
+prop.table(tableurban,1)
+chisq.test(ukr$migrant_refugee,ukr$Urban.Rural)
+
+#comparing alcohol abuse
+tablealchohol<-table(ukr$migrant_refugee,ukr$Alcohol.abuse)
+prop.table(tablealchohol,1)
+chisq.test(ukr$migrant_refugee,ukr$Alcohol.abuse)
+
+#comparing injected drug use
+tableinjection<-table(ukr$migrant_refugee,ukr$Injecting.drug.user)
+prop.table(tableinjection,1)
+chisq.test(ukr$migrant_refugee,ukr$Injecting.drug.user)
+
+#comparing homelessness
+tablehomeless<-table(ukr$migrant_refugee,ukr$Homeless)
+prop.table(tablehomeless,1)
+chisq.test(ukr$migrant_refugee,ukr$Homeless)
+
+#comparing healthcare worker
+tablehealthcare<-table(ukr$migrant_refugee,ukr$Healthcare.worker)
+prop.table(tablehealthcare,1)
+chisq.test(ukr$migrant_refugee,ukr$Healthcare.worker)
+
+#comparing prisoner
+tableprisoner<-table(ukr$migrant_refugee,ukr$Prisoner)
+prop.table(tableprisoner,1)
+chisq.test(ukr$migrant_refugee,ukr$Prisoner)
+
+#hiv status
+tablehiv<-table(ukr$migrant_refugee,ukr$hiv_def)
+prop.table(tablehiv,1)
+chisq.test(ukr$migrant_refugee,ukr$hiv_def)
+
+#localization
+tablelocal<-table(ukr$migrant_refugee,ukr$Localization)
+prop.table(tablelocal,1)
+chisq.test(ukr$migrant_refugee,ukr$Localization)
+
+#rifampin resistance
+tablerifampin<-table(ukr$migrant_refugee,ukr$DST.result.R)
+prop.table(tablerifampin,1)
+chisq.test(ukr$migrant_refugee,ukr$DST.result.R)
+
+
+
+#make dummy variables
+ukr$rif<-ifelse(ukr$DST.result.R=="Resistant",1,0)
+ukr$migrant<-ifelse(ukr$migrant_refugee=="Yes",1,0)
+ukr$sex<- ifelse(ukr$Sex=="Male",1,0)
+ukr$urban<-ifelse(ukr$Urban.Rural=="Urban",1,0)  #need to fix NA
+ukr$alcohol<-ifelse(ukr$Alcohol.abuse=="Yes",1,0)
+ukr$drug<-ifelse(ukr$Injecting.drug.user=="Yes",1,0)
+ukr$homeless<-ifelse(ukr$Homeless=="Yes",1,0)
+ukr$healthcare<-ifelse(ukr$Healthcare.worker=="Yes",1,0)
+ukr$prisoner<-ifelse(ukr$Prisoner=="Yes",1,0)
+ukr$hiv<-ifelse(ukr$hiv_def=="Positive",1,0)    #need to fix NA
+ukr$localization<- factor(ukr$Localization, c("Pulmonary","Extra-pulmonary","Both"), 
+                          labels=c('P','E','B'))
+
+#simple regression
+fitmigrant<-glm(ukr$rif~ukr$migrant,family=binomial(link=logit))
+summary(fitmigrant)
+exp(fitmigrant$coef) #odds ratio
+exp(confint(fitmigrant)) #confidence interval
+#being a migrant is associated with having a 26% increased odds of having rifampin resistance
+
+#building the regression
+  #include sex, age, urban/rural, alcohol use, drug use, homelessness, healthcare workers, prisoner, HIV status, and localization
+fitall=glm(rif~migrant+sex+Age+urban+alcohol+drug+homeless+healthcare+prisoner+hiv+localization,data=ukr,na.action=na.exclude,family=binomial(link=logit))
+  #stepwise backwards elimination
+step(fitall,direction="backward")
+  #the lower the AIC, the better the model
+
+#full regression 
+fitall=glm(rif~migrant+sex+Age+urban+alcohol+drug+homeless+healthcare+prisoner+hiv+localization,data=ukr,na.action=na.exclude,family=binomial(link=logit))
+summary(fitall)
+exp(fitall$coefficients)
+  #being a migrant is associated with a 42% increase in rifampin resistance when controlling for all...
+
+
+
+
+##########################################
+#minus healthcare
+fit1=glm(rif~migrant+sex+Age+urban+alcohol+drug+homeless+prisoner+hiv+localization,data=ukr,na.action=na.exclude,family=binomial(link=logit))
+summary(fit1)
+exp(fit1$coefficients)
+  #take out healthcare
+
+#minus urban
+fit2=glm(rif~migrant+sex+Age+alcohol+drug+homeless+prisoner+hiv+localization,data=ukr,na.action=na.exclude,family=binomial(link=logit))
+exp(fit2$coefficients)
+summary(fit2)
+ #take out urban
+
+#minus drug
+fit3=glm(rif~migrant+sex+Age+alcohol+homeless+prisoner+hiv+localization,data=ukr,na.action=na.exclude,family=binomial(link=logit))
+exp(fit3$coefficients)
+summary(fit3)
+  #take out drug
+
+#exclude hiv 
+fitall=glm(rif~migrant+sex+Age+urban+alcohol+drug+homeless+healthcare+prisoner+localization,data=ukr,family=binomial(link=logit))
+step(fitall,direction="backward")
+```
+
