@@ -1,0 +1,168 @@
+---
+title: "PHP_1511_Assignment_3"
+author: "Linda Wakamoto"
+date: "2024-08-14"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(dplyr)
+library(tidyverse)
+library(knitr)
+library(broom)
+library(readxl)
+library(Metrics)
+```
+
+```{r}
+kidney_df <- read.csv("kidney_small.csv")
+set.seed(1)
+kidney_df$id <- 1:nrow(kidney_df)
+kidney_train <- kidney_df %>% dplyr::sample_frac(0.75)
+kidney_test <- dplyr::anti_join(kidney_df, kidney_train, by = 'id')
+```
+
+```{r, fig.width=4, fig.height=3, out.width = "8.5in"}
+#plot of log(GFR) vs baseu
+plot(kidney_df$baseu,log(kidney_df$gfr))
+```
+```{r, fig.width=4, fig.height=3, out.width = "8.5in"}
+#plot of log(GFR) vs bascre
+plot(kidney_df$bascre,log(kidney_df$gfr))
+```
+```{r, fig.width=4, fig.height=3, out.width = "8.5in"}
+#plot of log(GFR) vs log(baseu)
+plot(log(kidney_df$baseu),log(kidney_df$gfr))
+```
+```{r, fig.width=4, fig.height=3, out.width = "8.5in"}
+#plot of log(GFR) vs log(bascre)
+plot(log(kidney_df$bascre),log(kidney_df$gfr))
+```
+
+# 2.
+In the baseu vs log(gfr) graph, I did not see a trend for baseu and log(gfr), nor a clear linear pattern. There was high density on the left side of the graph, with lower baseu values. There were a few outliers for high baseu and low log(gfr) values. When log transformation was applied to the baseu variable, the entire graph shifted to the right, and centered at around 0.5 for log(baseu). The variance became more stable in the log(baseu) graph. There was still some more density on the lower baseu values, but less than the original graph.
+
+In the bascre vs log(gfr) graph, I found that as bascre increases, the log(gfr) tends to decrease, with a few outliers on the lower bascre side of the graph. When log transformation was applied to the bascre variable, the graph noticeably looked more linear and followed a negative trend better than the original graph. Now the outliers were at higher log(bascre) values.
+
+```{r}
+mod1 <- lm(log(gfr)~baseu+bascre+sbase+dbase+age+male, data=kidney_df)
+mod2 <- lm(log(gfr)~log(baseu)+bascre+sbase+dbase+age+male, data=kidney_df)
+mod3 <- lm(log(gfr)~baseu+log(bascre)+sbase+dbase+age+male, data=kidney_df)
+mod4 <- lm(log(gfr)~log(baseu)+log(bascre)+sbase+dbase+age+male, data=kidney_df)
+
+results_df1 <- data.frame(Model=c("Model 1", "Model 2",
+                                 "Model 3", "Model 4"),
+                         AIC = c(AIC(mod1), AIC(mod2), AIC(mod3),
+                                 AIC(mod4)),
+                         Adjusted_R2 <- c(summary(mod1)$adj.r.squared,
+                                          summary(mod2)$adj.r.squared,
+                                          summary(mod3)$adj.r.squared,
+                                          summary(mod4)$adj.r.squared))
+colnames(results_df1) <- c("Model", "AIC", "Adjusted R2")
+kable(results_df1, digits=4)
+```
+An investigator would use adjusted R squared for comparing models, as this number represents the proportion of the outcome variable's variance the model explains, while penalizing for more variables in the data. They would also use AIC for comparison, as it estimates the prediction error by considering how much information is lost by using the fitted model. 
+
+For model 1, the adjusted R squared was 0.6458 and the AIC was 1706.043. For model 2, the adjusted R squared was 0.6634 and the AIC was 1642.393. For model 3, the adjusted R squared was 0.7322 and the AIC was 1356.755. For model 4, the adjusted R squared was 0.7349 and the AIC was 1344.11. Since higher adjusted R squared (closer to 1) and lower AIC represents a better model, model 4 is the best model with the highest adjusted R squared and lowest AIC out of the four models.
+
+```{r}
+mod4_step <- step(mod4)
+anova(mod4, mod4_step)
+summary(mod4_step)
+```
+
+# 3. 
+When performing backwards selection, sbase and dbase is dropped, as they have greater AIC levels than the model without them. The AIC improves when these variables are dropped. 
+
+The nested null hypothesis is that both of the estimated coefficients of sbase and dbase is equal to 0, and they do not contribute to improving the model. The alternate hypothesis is that at least one of these coefficients is not equal to 0. When the ANOVA test is used to compare the models with and without sbase and dbase, the p-value is greater than the significant level of 0.05, so the difference is not statistically significant, and we fail to reject the null hypothesis. This supports the decision to drop the sbase and dbase variables, as they do not improve this model.
+```{r}
+100*((exp(-.04481*log(1.01)))-1) #log(baseu)
+100*((exp(-1.195*log(1.01)))-1) #log(bascre)
+100*((exp(-.00263))-1) #age
+100*((exp(0.24377))-1) #male
+```
+
+Interpretation of the coefficients: 
+Intercept: For log(baseu) of 0, log(bascre) of 0, age of 0, and females, we expect the average log(gfr) to be 4.313. 
+
+Baseu: There is an estimated 0.0446% decrease in the value of gfr for each 1% increase in baseu adjusting for log(bascre), age, and male. 
+
+Bascre: There is an estimated 1.182% decrease in the value of gfr for each 1% increase in bascre adjusting for log(baseu), age, and male. 
+
+Age: There is an estimated 0.2627% decrease in the value of gfr for each 1 year increase in age, adjusting for log(baseu), log(bascre), and male. 
+
+Male: There is an estimated 27.61% increase in the value of gfr for males than for females, adjusting for log(bascre), log(baseu), and age. 
+
+```{r, fig.width=4, fig.length=2}
+plot(log(kidney_df$bascre), resid(mod4_step))
+```
+
+# 4. 
+The distribution of the residuals seem to follow a straight horizontal line for the most part, with a few outliers near the 1.0 log(bascre) values with lower residuals than the other log(bascre) values. This graph thus shows that the log(bascre) variable is homoscedastic (has equal variance), as most of the points follow the straight line. Due to the presence of some outliers however, we may want to look at polynomial transformation.
+
+```{r}
+mod_deg2 <- lm(log(gfr) ~ poly(log(bascre), 2), data=kidney_train)
+mod_deg3 <- lm(log(gfr) ~ poly(log(bascre), 3), data=kidney_train)
+mod_deg4 <- lm(log(gfr) ~ poly(log(bascre), 4), data=kidney_train)
+mod_deg5 <- lm(log(gfr) ~ poly(log(bascre), 5), data=kidney_train)
+results_df <- data.frame(Model=c("Degree 2 Polynomial", "Degree 3 Polynomial",
+                                 "Degree 4 Polynomial", "Degree 5 Polynomial"),
+                         AIC = c(AIC(mod_deg2), AIC(mod_deg3), AIC(mod_deg4),
+                                 AIC(mod_deg5)),
+                         BIC =  c(BIC(mod_deg2), BIC(mod_deg3), BIC(mod_deg4),
+                                 BIC(mod_deg5)),
+                         Adjusted_R2 <- c(summary(mod_deg2)$adj.r.squared,
+                                          summary(mod_deg3)$adj.r.squared,
+                                          summary(mod_deg4)$adj.r.squared,
+                                          summary(mod_deg5)$adj.r.squared))
+colnames(results_df) <- c("Model", "AIC", "BIC", "Adjusted R2")
+kable(results_df, digits=3)
+```
+The degree 4 polynomial has the best fit, as it has the lowest AIC value (1015.072) and BIC value (1044.128) and the highest adjusted R squared value (0.726).
+
+```{r}
+mod_loglog <- lm(log(gfr)~log(bascre), data=kidney_train)
+MAE_poly <- mae(kidney_test$gfr, predict(mod_deg4, kidney_test)) #(actual, predicted)
+MAE_loglog <- mae(kidney_test$gfr, exp(predict(mod_loglog, kidney_test))) #exp only if outcome is log
+RMSE_poly <- rmse(kidney_test$gfr, predict(mod_deg4, kidney_test))
+RMSE_loglog <- rmse(kidney_test$gfr, exp(predict(mod_loglog, kidney_test)))
+result_df_test <- data.frame(Model = c("Polynomial", "Log-Log"),
+                             MAE = c(MAE_poly, MAE_loglog),
+                             RMSE = c(RMSE_poly, RMSE_loglog))
+kable(result_df_test, digits =3)
+```
+
+# 5. 
+We can see that the polynomial model has a lower MAE and RMSE than the log-log model. With lower mean absolute error and root mean square error, the polynomial transformation leads to a model with better fit than a log-log transformation.
+
+Bias-Variance tradeoff: Using the training data is simple but can introduce potential bias to our estimate of the prediction error. If our model is too simple and has very few parameters, it can have high bias and low variance, which leads to underfitting the data. There needs to be a good balance between bias and variance so we can fit the data well. Our model does not exclude important variables or transformations, so our model has low bias. Due to this, it also has higher variance and is more specialized for our training data, and is not general enough to use for other data sets.
+
+```{r, fig.width=3, fig.height=3, out.width = "8.5in"}
+#plot of resulting model: no sbase and dbase, polynomial transformation on log(bascre), log(gfr)
+mod_deg4_full <- lm(log(gfr)~poly(log(bascre), degree=4), kidney_df)
+plot(mod_deg4_full)
+```
+
+The graph for residuals vs fitted shows that most of the points follow a straight line, and the residuals are equally spread around a horizontal line, and thus meets the linearity assumption. However, there are many upper outliers for the residuals, with three points labeled with its residuals - observations in rows 153, 66, and 518. There may be some unmeasured variables that are important to understand the relationship between these variables and gfr.
+
+The residuals' normal qqplot shows that the majority of points follow the straight diagonal line, with only its tails not following the line. The residuals’ lower tail strays more from the line than the upper tail, so this could indicate that the residuals are not normally distributed. Since there are potential outliers in the lower tail (observations in rows 153 and 518), removing these points may make the model fit normality better. 
+
+The scale location graph's red line is roughly horizontal across the plot. This shows that the assumption of homoscedasticity is likely. The residuals are spread roughly equally at all fitted values. The residuals are also randomly scattered above and below the red line. Some points have the highest standardized residuals, observations in rows 66, 153, and 518.
+
+By looking at the residuals vs leverage plot, we can see that most points do not have a high leverage, and have close to 0 leverage. The points that do have a higher leverage mostly do not have a high influence as their residuals are small. There are some outliers with high influence (large residual and high leverage). In this plot, we can clearly see Cook's distance lines as the observation in row 518 is close to being outside the Cook's distance line. This shows that this observation may be influential.
+
+This model satisfies the assumptions for linearity, normality, and homoscedasticity, and there are no apparent patterns in the residual plots, so the predicted values are not biased. Thus, I believe this model is useful for predicting GFR.
+
+# Code Appendix
+
+```{r ref.label=knitr::all_labels(),echo=TRUE,eval=FALSE}
+```
+
+
+
+
+
+
+

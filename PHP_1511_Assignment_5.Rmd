@@ -1,0 +1,139 @@
+---
+title: "PHP_1511_Assignment_5"
+author: "Linda Wakamoto"
+date: "2024-08-14"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(tidyverse)
+library(tableone) # tableone
+library(knitr) # to format tables
+library(broom) # to format glm/lm output
+library(readxl) # read excel files
+library(lmtest) # likelihood ratio tests
+library(ggsurvfit)
+library(gtsummary)
+```
+
+```{r}
+setwd("~/Downloads/")
+police_data = read.table("police.dat", header=T)
+police_data = data.frame(police_data)
+```
+
+```{r}
+#general summary table
+names <- c('eth','crime')
+police_data[names] <- lapply(police_data[names], factor)
+kableone(CreateTableOne(data=police_data))
+
+#number of stops and arrests by ethnicity
+police_data2 <- police_data %>% select(stops, arrests, eth) %>% na.omit()
+kableone(CreateTableOne(data=police_data2, strata=c("eth")))
+
+#number of stops and arrests by crime
+police_data3 <- police_data %>% select(stops, arrests, crime) %>% na.omit()
+kableone(CreateTableOne(data=police_data3, strata=c("crime")))
+```
+1a.
+Summary table results: There is an equal amount of people in each ethnicity group and crime type. The mean number of stops is 146.02, the mean population size is 30,104.52, and the mean precinct number is 38. There are 900 observations in this data set.
+
+Summary table of arrests and stops based on ethnicity: The highest amount of stops and arrests from these three ethnicity groups were for the black ethnicity. The least amount of stops and arrests were for the white ethnicity.  Those who were black had around four times more stops than those who were white, and around 1.5 times more than those who were latino/a. Those who were black had around 3.5 times more arrests than those who were white, and around 1.7 times more arrests than those who were latino/a.
+
+Summary table of arrests and stops based on crime: The highest number of stops were for the weapons type crime, and the least were for the drug type crime. The highest number of arrests were for the drug type crime, and the least were for the weapons type crime. The crime type with the highest number of stops hadthe lowest number of arrests, and vice versa.
+
+```{r}
+mod1 <- glm(stops~eth, data=police_data, family=poisson(link="log"))
+kable(tidy(mod1, exponentiate=TRUE, conf.int=TRUE), digits = 3) 
+```
+1b. 
+Intercept: The estimated rate of stops by police is 232.743 for those who are black.
+Race 2: The estimated rate of stops by police is 0.639 times higher for those who are latino/a compared to those who are not.
+Race 3: The estimated rate of stops by police is 0.243 times higher for those who are white compared to those who are not.
+
+```{r}
+mod2 <- glm(stops~eth+crime, data=police_data, family=poisson(link="log"))
+kable(tidy(mod2, exponentiate=TRUE, conf.int=TRUE), digits = 3) 
+```
+1c. 
+Intercept: The estimated rate of stops by police is 227.239 for those who are black and committed a violent type crime.
+Ethnicity 2: The estimated rate of stops by police is 0.639 times higher for those who are latino/a, adjusting for crime type.
+Ethnicity 3: The estimated rate of stops by police is 0.243 times higher for those who are white, adjusting for crime type.
+Crime 2: The estimated rate of stops by police is 1.801 times higher for those who have committed a weapons type crime, adjusting for ethnicity.
+Crime 3: The estimated rate of stops by police is 0.828 times higher for those who have committed a property type crime, adjusting for ethnicity.
+Crime 4: The estimated rate of stops by police is 0.468 times higher for those who have committed a drug type crime, adjusting for ethnicity.
+
+```{r}
+lrtest(mod1, mod2)
+```
+1d. 
+With a significance level of 0.001, we reject the null hypothesis, and conclude that the second model which includes both ethnicity and crime variables, is a better model.
+
+```{r}
+var(police_data$stops)/mean(police_data$stops)
+```
+1e. The variance of the stops variable is larger than the mean of the stops variable (around 323 times larger), so overdispersion is an issue with this dataset.
+
+```{r}
+library(survival)
+library(haven)
+setwd("~/Downloads/")
+vet_data = read_dta("veteran.dta")
+vet_data = data.frame(vet_data)
+```
+
+```{r}
+vet_data$status <- as.factor(vet_data$status)
+vet_data$celltype <- as.factor(vet_data$celltype)
+kableone(CreateTableOne(data=vet_data, c("celltype","status","time","age"),))
+```
+2a. The highest number of veterans in this dataset have smallcell lung cancer, and the least have adeno and large type lung cancers. The average survival time is 121.63 and the average age is 58 years. 93.4% of censoring status were from observed death.
+
+```{r, fig.width=5, fig.height=4, out.width = "8.5in"}
+p <- ggplot(vet_data, aes(x = time, colour = (celltype)))
+p + geom_density()
+```
+The plot above shows that smallcell and adeno type lung cancer patients had mostly short survival time, while squamous and large type lung cancer patients had longer survival time, with large type patients' distribution of survival time having its peak at the longest survival time.
+
+```{r}
+vet_data$celltype <- as.numeric(vet_data$celltype)
+vet_data$status <- as.numeric(vet_data$status)
+survdiff(Surv(time, status) ~ celltype, data = vet_data)
+```
+2b. We see that there was a significant difference in overall survival according 
+to cell type in the veterans data, with a p-value of p = 1e-05.
+
+```{r, fig.width=5, fig.height=4, out.width = "8.5in"}
+survfit2(Surv(time, status) ~ celltype, data = vet_data) %>% 
+  ggsurvfit() +
+  labs(
+    x = "Days",
+    y = "Overall survival probability"
+  ) +
+  add_risktable()
+```
+2c. Cell type 1, or squamous type lung cancer has the highest survival rate, with a maximum of 1000 survival days. Cell type 3, or adeno type lung cancer has the lowest survival rate, with a maximum of less than 250 survival days.
+
+```{r, message=FALSE}
+vet_data$celltype <- as.factor(vet_data$celltype)
+vet_data$prior <- as.factor(vet_data$prior)
+vet_data$status <- as.numeric(vet_data$status)
+
+coxph(Surv(time, status) ~ celltype+age+prior,
+  data = vet_data
+  ) %>% 
+  tbl_regression(exp = TRUE)
+```
+2d. There is a 172% increase in mortality risk for cell type 2 compared to cell type 1, a 222% increase in mortality risk for cell type 3 compared to cell type 1, and a 27% increase in mortality risk for cell type 4 compared to cell type 1, adjusting for other co-variates. There's a 1% increase in mortality risk for every increase in age by one year, adjusting for other co-variates. There's a 5% increase in mortality risk for those with prior therapy compared to those without it, adjusting for other co-variates. Overall, the statistically significant hazard ratios were for the celltype 2 and 3 variables only, in this cox-proportional hazard model.
+
+# Code Appendix
+```{r ref.label=knitr::all_labels(),echo=TRUE,eval=FALSE}
+```
+
+
+
+
+
+

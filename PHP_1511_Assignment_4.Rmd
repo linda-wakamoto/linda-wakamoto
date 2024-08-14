@@ -1,0 +1,142 @@
+---
+title: "PHP_1511_Assignment_4"
+author: "Linda Wakamoto"
+date: "2024-08-14"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(tidyverse)
+library(tableone) # tableone
+library(knitr) # to format tables
+library(broom) # to format glm/lm output
+library(readxl) # read excel files
+library(lmtest) # likelihood ratio tests
+library(caret) # confusion matrix
+library(glmtoolbox) # goodness-of-fit test
+library(predtools) # calibration plot
+library(pROC) # ROC and AUC
+```
+
+```{r,include=FALSE}
+training_data <- read.csv("tb_kharitode.csv")
+names <- c('tb','male','hiv_pos','diabetes','cough','fever','weight_loss','night_sweats','chest_pain','ever_smoke','past_tb')
+training_data[,names] <- lapply(training_data[,names], factor)
+str(training_data)
+```
+
+
+```{r}
+kableone(CreateTableOne(data=training_data, strata=c("tb"),))
+```
+1a. I observe that most TB patients are in the 35 to 45 age range with a 27.6% percentage. The least amount of TB patients are in the 15 to 25 age range with a 13.2% percentage. The majority of TB patients are male, have a positive HIV outcome, have had diabetes before, experience night sweats, coughs, weight loss, chest pain, have smoked, and have previously had TB. For the training data, every variable except diabetes and cough were significantly associated with TB, using the significance level of 0.05. The largest difference in proportions between those with TB and not TB was for the fever (21.4), HIV positive (27.4), night sweats (35.2), and weight loss (45.5) variables from lowest to highest differences respectively.
+```{r}
+mod1 <- glm(tb~age_group+male+hiv_pos+diabetes+cough+fever+weight_loss+night_sweats+chest_pain+ever_smoke+past_tb, data=training_data, family=binomial(link="logit"))
+mod2 <- step(mod1)
+```
+
+1c. Stepwise selection removes the variable that decreases the AIC of the model significantly, until no more removals would create a significant decrease of the model's AIC. In this case, cough and chest_pain were removed.
+```{r}
+lrtest(mod2, mod1)
+```
+1d. Likelihood ratio test results' interpretation: As the p-value is 0.1805 and is greater than the significance level of 0.05, we do not have enough evidence to reject the null hypothesis. This means that the Model 2 from the stepwise selection is a better model, as the removed variables were not significant.
+```{r}
+kable(tidy(mod2, digits = 3, exponentiate=TRUE))
+```
+2a. Intercept: The estimated odds of TB for those who are 0 years old, female, HIV negative, does not have diabetes, no fever, no weight loss, no night sweats, never smoked, and never had TB is 0.1755. This is not a practical number in this case.
+
+Age_group[25,35): The estimated odds of having TB for those in an age group between 25 and 35 is 1.28 times the odds of having TB for those in other age groups, adjusting for other variables.
+
+Age_group[35,45): The estimated odds of having TB for those in an age group between 35 and 45 is 0.88 times the odds of having TB for those in other age groups, adjusting for other variables.
+
+Age_group[45,55): The estimated odds of having TB for those in an age group between 45 and 55 is 0.67 times the odds of having TB for those in other age groups, adjusting for other variables.
+
+Age_group[55,99): The estimated odds of having TB for those in an age group between 55 and 99 is 0.51 times the odds of having TB for those in other age groups, adjusting for other variables.
+
+Male: The estimated odds of having TB for those who are male is 2.63 times the odds of having TB for those who are female, adjusting for other variables.
+
+Hiv_pos: The estimated odds of having TB for those who have previously tested HIV positive is 2.75 times the odds of having TB for those who have not, adjusting for other variables.
+
+diabetes: The estimated odds of having TB for those who have been diagnosed with diabetes is 2.33 times the odds of having TB for those who have not, adjusting for other variables.
+
+fever: The estimated odds of having TB for those who have had fever as a symptom is 1.27 times the odds of having TB for those who have not, adjusting for other variables.
+
+weight_loss: The estimated odds of having TB for those who have experienced weight loss is 5.87 times the odds of having TB for those who have not, adjusting for other variables.
+
+night_sweats: The estimated odds of having TB for those who have had night sweats as a symptom is 2.21 times the odds of having TB for those who have not, adjusting for other variables.
+
+ever_smoke: The estimated odds of having TB for those who has ever smoked is 0.76 times the odds of having TB for those who have not, adjusting for other variables.
+
+past_tb: The estimated odds of having TB for those who have previously been diagnosed with TB is 1.39 times the odds of having TB for those who have not, adjusting for other variables.
+
+```{r}
+mod3 <- glm(tb ~ age_group + male + hiv_pos + diabetes + fever + 
+    weight_loss + night_sweats + ever_smoke + past_tb + hiv_pos:male, data=training_data, family=binomial(link="logit"))
+
+kable(tidy(mod3, digits = 3, exponentiate=TRUE))
+2.341+1.3
+```
+2b. I added the interaction between the male variable and the hiv_pos variable. The odds for those who are male is 3.641 higher than those who are female for those who have previously tested positive for HIV. The odds for those who are male is 2.341 higher than those who are female for those who have not previously tested positive for HIV. 
+
+2c. This interaction was not significant at the 0.05 level, so I decided to not add it to the model.
+
+```{r, fig.width=4, fig.length=2}
+training_data$pred_probs <- predict(mod2, type="response")
+training_data$prob_grp <- cut(training_data$pred_probs, 10)
+calibration_df <- training_data %>%
+  group_by(prob_grp) %>%
+  summarize(avg_tb = mean(tb==1), avg_prob = mean(pred_probs))
+ggplot(calibration_df)+geom_point(aes(x=avg_prob,y=avg_tb))+
+  geom_abline(aes(slope=1,intercept=0),col="red")
+
+hltest(mod2)
+```
+3a. Comment on the results of calibration plot: There are around five points that do not fit the estimated prediction line. These points include the observations around 0.23, 0.27, 0.6, 0.7, and 0.76 average predicted probabilities.
+#model is fairly well calibrated with some issues for certain points.
+
+Comment on results of goodness of fit test: The p-value was 0.15022, which is larger than the significant level of 0.05, so we fail to reject the null hypothesis and cannot conclude that the data came from the estimated distribution.
+
+```{r}
+pred_probs <- predict(mod2, type="response")
+pred_ys <- ifelse(pred_probs >0.5, 1, 0)
+confusionMatrix(as.factor(pred_ys),as.factor(training_data$tb), positive='1')
+```
+3b. The sensitivity is 0.7009 and specificity is 0.8276, so both are relatively high numbers. This test correctly detects 70% of adult patients with TB, and correctly detects around 83% of adult patients without TB. The test is slightly better at detecting those without TB than those with TB. The accuracy is 0.7674, which is also relatively high. This means that around 77% of patients receive a correct result from the test.
+```{r, fig.width=4, fig.length=2}
+roc_mod <- roc(predictor=pred_probs, response=training_data$tb)
+plot(roc_mod, print.auc=TRUE)
+```
+
+3c. The AUC is 0.826, which shows that the discrimination for this model is very good. This means that the model's predictions are 82.6% correct.
+```{r, include=FALSE}
+validation_data <- read.csv("tb_stomp.csv")
+validation_data[,names] <- lapply(validation_data[,names], factor)
+str(validation_data)
+```
+
+
+```{r}
+kableone(CreateTableOne(data=validation_data, strata=c("tb"),))
+```
+
+4a. The validation data has a larger proportion of both TB positive and negative individuals with coughing symptoms. Unlike the training data, the validation data had higher percentage of cough symptoms represented in those with a negative TB diagnosis than a positive TB diagnosis. It also has a larger proportion of those with TB positive test results who have had a TB diagnosis before (38.9% vs 18.8%). At a significance level of 0.05, it has fewer variables that are significantly associated with TB. For the training data, every variable except diabetes and cough were significantly associated with TB. For the validation data, HIV positive, diabetes, and cough were not significantly associated with TB. Another difference is that for the validation data, the least TB patients were in the 45 to 55 age range while it was 15 to 25 for the training data. The amount of patients with cough symptoms for TB and non-TB patients was around the same for the validation data, but higher in TB patients for the training data.
+```{r, fig.width=4, fig.length=2}
+mod1_validation <- glm(tb~age_group+male+hiv_pos+diabetes+cough+fever+weight_loss+night_sweats+chest_pain+ever_smoke+past_tb, data=validation_data, family=binomial(link="logit"))
+mod2_validation <- step(mod1_validation)
+pred_probs2 <- predict(mod2_validation, type="response")
+pred_ys2 <- ifelse(pred_probs2 >0.5, 1, 0)
+confusionMatrix(as.factor(pred_ys2),as.factor(validation_data$tb), positive='1')
+
+roc_mod2 <- roc(predictor=pred_probs2, response=validation_data$tb)
+plot(roc_mod2, print.auc=TRUE)
+```
+4b. Since I used Model 2 for Problem 2, I did not include the HIV status and male variable interaction for the validation data either. The validation data's sensitivity was very low, with 0.30556, while its specificity was very high with 0.96190. Its accuracy was high with 0.8398. Compared to the training data, the validation data had much lower sensitivity and higher specificity and accuracy. This test correctly detects around 30% of adult patients with TB, and correctly detects around 96% of adult patients without TB. The test is better at detecting those without TB than those with TB. Around 84% of patients receive a correct result from the test.
+
+The AUC for the validation data is 0.8, so the discrimination for the validation data is considered to be very good. The model's prediction is 80% correct. This is slightly less than the training data.
+
+4c. As the sensitivity, specificity, and accuracy changed from the training data to the validation data, the model does not generalize to populations outside of the training population well. The validation model also had lower AUC than the training data, and so this also shows that this model does not generalize well to populations outside the training population.
+
+# Code Appendix
+```{r ref.label=knitr::all_labels(),echo=TRUE,eval=FALSE}
+```

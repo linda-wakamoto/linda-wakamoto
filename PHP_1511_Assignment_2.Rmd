@@ -1,0 +1,199 @@
+---
+title: "PHP_1511_Assignment_2"
+author: "Linda Wakamoto"
+date: "2024-08-14"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+{
+  library(tidyverse)
+library(readr)
+library(tableone)
+  library(GGally)
+library(readxl)
+library(knitr)
+}
+```
+
+```{r, include=FALSE}
+kidney_small <- read.csv("Downloads/kidney_small.csv")
+```
+
+```{r}
+kidney_small$male <- as.factor(kidney_small$male)
+kidney_small$black <- as.factor(kidney_small$black)
+
+#create a variable list
+vars <- c("gfr", "bascre", "sbase", "dbase", "baseu","age", "male", "black")
+
+tableOne <- CreateTableOne(vars = vars, strata = c('male'), data = kidney_small)
+tableOne
+
+tableOne2 <- CreateTableOne(vars = vars, strata = c('black'), data = kidney_small)
+tableOne2
+```
+1(a)
+All assessments are made at the 0.05 significance level. The variables that show significantly different distributions between males and females is only urine protein, systolic blood pressure, and age. The mean urine protein for women is 0.85 less than for men. The mean systolic blood pressure for females are around 5.5 more than men. The variables that show significantly different distributions between those who are black and not black are systolic blood pressure, diastolic blood pressure, and urine protein. Black individuals had around 14.98 less systolic blood pressure (in mmHg), 4.33 less diastolic blood pressure (in mmHg), and around 1mg/dL less urine protein. 
+```{r, fig.width=6}
+p <- ggplot(kidney_small, aes(x = gfr, colour = (male)))
+p + geom_density()
+```
+This graph shows the density plot for gfr for males and females. Males seemed to have a slightly lower gfr than females as the mean is lower. Both graphs are skewed right, but the distribution curve for females have two peaks, while for males, it was unimodal. For both males and females, the peak of the distributions is around 30. Both distributions have the highest gfr at over 150. 
+
+```{r, fig.width=6}
+p <- ggplot(kidney_small, aes(x = gfr, colour = (black)))
+p + geom_density()
+```
+This graph shows the density plot of GFR for black and non black patients. Black patients show lower gfr than non-black patients, as the mean is lower. There are more non-black patients with higher gfr than black patients. Both  graphs are skewed right, but for non-black patients, the graph had two peaks, while for black patients, the graph was unimodal. The peak of the distribution for black patients was higher than for non-black patients.
+
+```{r}
+plot(kidney_small$bascre,kidney_small$gfr)
+plot(kidney_small$sbase,kidney_small$gfr)
+plot(kidney_small$dbase,kidney_small$gfr)
+plot(kidney_small$baseu,kidney_small$gfr)
+plot(kidney_small$age,kidney_small$gfr)
+plot(kidney_small$male,kidney_small$gfr, xlab="male", ylab="gfr")
+plot(kidney_small$black,kidney_small$gfr, xlab="black", ylab="gfr")
+```
+The serum creatinine seems to have a clear association with glomerular filteration rate (gfr), as its graph is the only one with a curve pattern, with lower serum creatinine producing higher gfr. There seems to be a negative linear relationship between serum creatinine and gfr. Urine protein also seems to have a relationship with gfr, as it is skewed to the right. There seems to be a slightly negative linear relationship between urine protein and gfr. For the other variables, there does not seem to be a notable relationship between them and gfr. The data seems to have older patients, as there is a higher density of points in the 50-70 age range. The data seems to also have more patients that have lower urine protein. There is a maximum outlier and a larger maximum for males than females for gfr, and a slightly higher median. There is a maximum outlier and a larger maximum for nonblack individuals than black individuals for gfr. The medians are very similar.
+
+```{r, fig.width=6}
+model <- lm(gfr~bascre+age+male, data=kidney_small)
+summary(model)
+```
+
+1(b). gfr = -14.3725(bascre)+0.1885(age)+3.6156(male)+63.9276
+
+We estimate that with every 1mg/dL higher serum creatinine level, on average, the glomerular filteration rate decreases by 14.3725 mL/min, adjusting for age and gender variables. We estimate that with every one year increase in age, on average, the glomerular filteration rate increases by 0.1885 mL/min, adjusting for serum creatinine and gender variables. We estimate that males have a higher glomerular filteration rate than females by 3.6156 mL/min, adjusting for serum creatinine and age variables. Patients who are female, 0 years old, and have 0mg/dL of serum creatinine level have an expected value of 63.9276 mL/min for their glomerular filteration rate.
+
+1(c). The r-squared value is 0.536 for this model. This means that 53.6% of the variation in the glomerular filteration rate can be explained by one's serum creatinine level, age, and gender. The model explains 53.6% of the variations in the glomerular filteration rate around its mean.
+
+```{r}
+model2 <- lm(log(gfr)~log(bascre)+age+male, data=kidney_small)
+summary(model2)
+```
+1(d). We estimate that with every 1mg/dL higher log of the serum creatinine level, on average, the log of the glomerular filteration rate decreases by 1.25 mL/min, adjusting for age and gender variables. We estimate that with every one year increase in age, on average, the log of the glomerular filteration rate decreases by 0.0012 mL/min, adjusting for serum creatinine and gender variables. We estimate that males have a higher log glomerular filteration rate than females by 0.23 mL/min, adjusting for serum creatinine and age variables. Patients who are female, 0 years old, and have 0mg/dL of serum creatinine level have an expected value of 4.28 mL/min for the log of their glomerular filteration rate.
+The new R-squared value is 0.7311. 
+The R-squared value has increased by around 0.2 when log transformation was applied to the glomerular filteration rate and serum creatinine level variables. As it became closer to 1, this new model explains more of the variance of gfr than the old model. All of the coefficients have changed greatly. The intercept coefficient decreased by around 59.68, the  the serum creatinine coefficient increased by around 13.13, the age coefficient decreased by around 0.18, and the male coefficient decreased by around 3.39. The age coefficient changed signs, and now an increase of age has led to a decrease in the log of gfr.
+
+```{r}
+library(broom)
+```
+2(a). The p-value is calculated using the t-test for each variable's association with the log of glomerular filteration rate (gfr), with degrees of freedom being n-p-1 (where n is the number of observations, and p is the number of predictors in the model). In this case, the degrees of freedom is 1249-3-1 = 1245. The null hypothesis is that the variable is not associated with log(gfr), while adjusting for other variables, and the alternative hypothesis is that the variable is associated with log(gfr), while adjusting for other variables. Serum creatinine and gender variables are the only variables with a significant p-value. With a significance level of 0.05, the log of serum creatinine has a significant association with the log of gfr, while adjusting for age and male variables. With a significant level of 0.05, gender is associated with the log of gfr, while adjusting for log(bascre) and age variables.
+```{r}
+qt(0.975,df=1245)
+```
+```{r}
+-1.245+((1.961871)*(0.4164)*(-1.245))
+-1.245-((1.961871)*(0.4164)*(-1.245))
+```
+2(b). The 95% confidence interval for the coefficient of log(bascre) is (-2.262,-0.228).
+
+2(c).The degrees of freedom is 3 and 1245, and the p-value is less than 2e-16, for the F statistic. The first degrees of freedom is the number of groups minus 1, which is 3. The second degrees of freedom is the total number of observations (1249) minus the number of groups, which is 4.
+
+2(d). For each covariate, the null hypothesis is that it has no association with the log of the gfr variable (log(gfr)). The alternative hypothesis is that it has an association with log(gfr). 
+The p-value for log(bascre) is less than 0.05, so we have enough evidence to conclude that the log of the bascre variable has a statistically significant association with log(gfr), adjusting for the age and male variables. The p-value for age is greater than 0.05, so we do not have enough evidence to conclude that the age variable has a statistically significant association with log(gfr), adjusting for the log(bascre) and male variables. The p-value for male is less than 0.05, so we have enough evidence to conclude that the male variable has a statistically significant association with log(gfr), adjusting for the log(bascre) and age variables. Overall, there is significant evidence that log(bascre) and gender are associated with log(gfr), when adjusting for other variables.
+
+```{r, fig.width=6}
+res <- resid(model2)
+qqnorm(res)
+qqline(res) #qqplot and diagonal line
+
+#histogram of residuals
+ggplot(data=kidney_small, aes(x=model2$res))+geom_histogram()
+```
+3(a). The residuals' qqplot shows that a majority of the points align with a roughly straight line, with its tails not aligning with the line. The residuals' lower tail strays quite a bit from the line than the upper tail, so this could indicate that the residuals are not normally distributed. Since the tails stray from the normal distribution, if the outliers are taken from the model, the model may fit normality better. The histogram follows a bell curve, but is skewed to the left; indicating that the distribution may not be normal. From these plots, I found that there are multiple lower outliers for its residuals, and that it is not astrong assumption to say that normality is met.
+
+```{r, fig.width=6}
+#residuals vs fitted values plot
+plot(model2,1)
+```
+```{r, fig.width=6}
+#graph of log(bascre) covariate and residual
+plot(log(kidney_small$bascre), res)
+
+#graph of age covariate vs residual
+plot(kidney_small$age, res)
+
+#graph of male covariate vs residual
+plot(kidney_small$male, res, xlab="male", ylab="residual") #doesn't become a scatterplot
+```
+3(b). The graph for residuals vs fitted shows that most of the points follow a straight line, are evenly centered around a residual value of 0, and meets the homoscedasticity assumption (the residuals have equal variance). I observed that this model's residuals have equal variance, but there are some outliers for younger age and log(bascre) of around 0.5 to 1. There may be some unmeasured variables that are important to understand the relationship between these variables and gfr.
+
+The graph for the log of the bascre covariate vs residual shows that there are multiple lower outliers for its residuals. The points mostly fit a straight line, showing its homoscedasticity. There seems to be a higher density of residuals on the lower log(bascre) side than the higher. The graph for the age covariate vs residual shows that at younger ages, there are more lower outliers. There seems to be a higher density of residuals on the higher age side than the lower age. However, most of the points fit a straight line, showing its homoscedasticity. The graph for the male covariate vs residual shows that males have lower outliers for its residuals, more than females. The boxplot shows homoscedasticity because the boxwidths are of similar width, with both males and females having similar amounts of outliers. The male boxplot distribution is a little less homoscedastic than females, as there are more outliers with lower residuals than 0. These plots showed me that this model meets the homoscedasticity assumption, and is a well-fitting model for the variance of log(gfr).
+
+```{r, fig.width=6}
+#plot for gfr vs original model's residuals 
+mod2_resid <- kidney_small$gfr-exp(predict(model2))
+plot(kidney_small$gfr, mod2_resid)
+abline(0,0, col="red")
+```
+4(a). As gfr increases, there are less density of residuals but higher values of residuals. As gfr increases, the residuals are also spread further apart. The lowest residuals exist in observations where gfr is around 0. This graph also shows that there is less homoscedasticity in this model, as the residuals are not evenly surrounding the line for when residual is 0. Since the residuals do not meet the normality assumption, the homoscedasticity is a strong assumption for this model. Therefore, we may prefer a different model.
+
+```{r, fig.width=6}
+abs <- abs(rstandard(model2)) 
+sum(abs > 3)
+hist(rstandard(model2))
+```
+4(b). My approach to finding outliers was taking the absolute value of the standardized residuals and seeing which were greater than 3. I found that 22 points were outliers.
+
+```{r, fig.width=6}
+leverage <- hatvalues(model2)
+
+p <- 4
+n <- nrow(kidney_small)
+thres <- 3*p/n
+kable(kidney_small[leverage > thres,])
+
+leverage[113]
+leverage[1185]
+
+range(kidney_small$age)
+plot(model2)
+```
+4(c). The point with the highest leverage statistic is observation 1185, with a leverage statistic of 0.0107593. Observation 113 also has a high leverage, that is more than 3 times the average leverage. Observaton 113 has a high leverage because the age is 75, which is one of the highest age values. Observation 1185 has a high leverage value because the age of this observation is 15, which is the lowest. By looking at the residuals vs leverage plot, we can see that this point does not have a large residual, so it does not have a high influence.
+
+4(d). Removing the influencial observations does not change the sign of the coefficient for log(bascre). The maximum dfbeta value for the log(bascre) coefficient is 0.004536629, or observation 35. The coefficient of log(bascre) in the model including this observation was -1.245, and the coefficient of log(bascre) in the model removing this observaiton was -1.249. Removing this maximum dfbeta value did not change the sign of the coefficient for log(bascre). Any other influencial observations does not change this sign either, as they have lower influence than these two observations.
+
+```{r, fig.width=6}
+#inf_mod <- influence.measures(model2)$infmat
+#dim(inf_mod)
+dfbetas_mod <- dfbeta(model2)#as.data.frame(inf_mod)[,1:5]
+head(dfbetas_mod)
+dim(dfbetas_mod)
+high_infl <- max(dfbetas_mod[,2])
+
+kable(kidney_small[dfbetas_mod[,2] >= high_infl,]) #35
+kidney_small_2 <- 
+  kidney_small %>%
+    filter(!row_number() %in% c(35))
+
+lm(log(gfr)~log(bascre)+age+male, data=kidney_small_2)
+#kable(kidney_small[dfbetas_mod[,2] > 1.2452406,])
+
+#boxplots of dfbeta
+dfbeta_mod <- dfbeta(model2)
+names(dfbeta_mod) <- names(coef(model2))
+long_dfbeta <- pivot_longer(as.data.frame(dfbeta_mod), cols=c(1:4))
+ggplot(long_dfbeta) + geom_boxplot(aes(x=as.factor(name), y=value))+
+  labs(x="Coefficient", y="DFBETA")
+```
+
+
+# Code Appendix
+
+```{r ref.label=knitr::all_labels(), echo=TRUE, eval=FALSE}
+```
+
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

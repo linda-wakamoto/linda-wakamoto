@@ -1,0 +1,138 @@
+---
+title: "PHP_1511_Assignment_1.Rmd"
+author: "Linda Wakamoto"
+date: "2024-08-14"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Assignment 1
+
+1(a). 
+```{r, echo=FALSE}
+library(tidyverse) 
+laws <- read.csv("state_rep_laws.csv")
+unique(laws$state, incomparables = FALSE)
+```
+
+
+```{r, echo=FALSE}
+state.name
+```
+34 states are included. Missing states are Alaska, Arkansas, Idaho, Hawaii, Iowa, Kentucky, Louisiana, Maryland, Massachusetts, Montana, New Hampshire, New Jersey, New Mexico, Rhode Island, West Virginia, and Wyoming. Given this information, I would say that the population in the data is not reflective of the overall US population, since it is missing 16 states' data.
+
+1(b).
+```{r, echo=FALSE}
+laws <- laws %>% mutate(abortions_per_1000_women = (laws$abortion_count_2010/laws$women)*1000)
+```
+1(c).
+```{r, echo=FALSE}
+library(tableone)
+
+#create a variable list
+vars <- c("state", "women", "median_income", "democrat_2008", "dist_to_closest_facility_miles","abortion_count_2010")
+#create a table summarizing the data stratified by whether a state is highly_restrictive
+tableOne <- CreateTableOne(vars = vars, strata = c("highly_restrictive"), data = laws)
+tableOne
+
+```
+
+687 out of (687+1486=2173) counties are highly restrictive, so this percentage is around 31.6%.
+
+The variables that show a significantly different distribution between the two groups are the mean number of women residents, the mean abortion count, the mean distance to the closest facility, and the median household income in 2010. The mean number of women residing in highly restrictive counties is around 18,000 less than in counties that are not highly restrictive. The mean abortion count for non restrictive counties is around 150 higher than  for restrictive counties. The distance to the closest facility is around 17 miles longer for non highly restrictive counties than for highly restrictive counties. The median household income in 2010 is around $3650 higher for counties that are not highly restrictive than for highly restrictive counties.
+
+1 (d)
+```{r, echo=FALSE}
+laws$highly_restrictive <- as.factor(laws$highly_restrictive)
+laws <- laws%>%
+  filter(!is.na(abortions_per_1000_women))
+p <- ggplot(laws, aes(x = abortions_per_1000_women, colour = (highly_restrictive)))
+p + geom_density()
+```
+```{r}
+p <- ggplot(laws, aes(x = log(abortions_per_1000_women), colour = (highly_restrictive)))
+p + geom_density()
+```
+Both lines in the first graph are right skewed, and both lines in the second graph are left skewed. Due to the log transformation, the second graph has negative values for the x-values, while the non-log graph has all positive values for its x-values. The log graph is skewed to the left, while the non-log graph is skewed to the right. The highly restrictive counties have lower mean in the second graph than the first graph. However, for both graphs, the highly restrictive counties have higher density (there is a stronger peak) than the non highly restricted.
+
+1 (e)
+```{r, echo=FALSE}
+library(ggplot2)
+laws <- laws%>% filter(!is.na(dist_to_closest_facility_miles))
+plot(laws$abortions_per_1000_women, laws$dist_to_closest_facility_miles[1:length(laws$abortions_per_1000_women)])
+```
+
+There seems to be a relationship between the two variables. As abortions increase, the distance to a closest facility decreases; the closer the nearest facility, the higher the abortion rate (in this data).
+
+1. (f)
+```{r, echo=FALSE}
+plot(laws$democrat_2008,laws$dist_to_closest_facility_miles)
+```
+
+I graphed the democratic votes in the election of 2008, and the distance to the closest abortion facilities. States with higher democratic votes seem to have closer proximity to the nearest abortion clinics in this data.
+
+2. (a)
+```{r, echo=FALSE}
+lm <- lm(abortions_per_1000_women~highly_restrictive, data=laws)
+summary(lm)
+```
+Interpretation of estimated coefficients: We estimate that counties that are in states labeled as highly restrictive have around 0.36197 lower number of abortions per 1000 women in 2010 than counties that are not highly restrictive. This is a statistically significant association, as the p-value is less than 0.05. Counties in states labeled as not highly restrictive have an expected value of 2.62401 abortions per 1000 women.
+
+2. (b)
+
+The estimated regression model for these two variables is:
+Abortions per 1000 women in 2010 = 2.62401-0.36197(highly restrictive indicator)
+
+```{r, echo=FALSE}
+plot(laws$abortions_per_1000_women,laws$highly_restrictive)
+a_hat <- coef(lm)[1] # first value - intercept
+b_hat <- coef(lm)[2] # second value - slope
+abline(a_hat, b_hat)
+```
+
+```{r, echo=FALSE}
+library(ggfortify)
+autoplot(lm)
+```
+Normality - Not met, the second plot shows a curved line, not a straight line.
+Independence - met, as counties are independent of one another in terms of abortion laws.
+Linearity - met, as the first plot for the regression shows linearity of the relationship between highly restrictive indicator and abortions per 1000 women, as there is no pattern in the residual plot. We also assume linearity between these two variables.
+Equal Variance - met, the third plot shows a horizontal line with equally spread points.
+
+Normality is not met, so this assumption seems the least strict. Independence, linearity, and equal variance are met, so these assumptions seem the most strict.
+
+
+2. (c)
+```{r, echo=FALSE}
+lm2 <- lm(abortions_per_1000_women~dist_to_closest_facility_miles, data=laws)
+summary(lm2)
+```
+Interpretation of estimated coefficients: We estimate that counties that are one mile farther to their closest facility than other counties have around 0.0119 lower number of abortions per 1000 women in 2010. This is a statistically significant association, as the p-value is less than 0.05. Counties that are 0 miles away from the closest facility have an expected value of 3.3421 abortions per 1000 women.
+
+The estimated regression model for these two variables is:
+abortions per 1000 women = 3.3421 - 0.0119(distance to the closest facility in miles)
+
+```{r,echo=FALSE}
+plot(laws$abortions_per_1000_women,laws$dist_to_closest_facility_miles)
+a_hat2 <- coef(lm)[1] # first value - intercept
+b_hat2 <- coef(lm)[2] # second value - slope
+abline(a_hat2, b_hat2)
+autoplot(lm2)
+```
+
+Normality - Not met, the second plot shows a curved line, and the points are not following a straight line.
+Independence - met, as counties are independent of one another in terms of distance to the nearby facility.
+Linearity - not met, as the first plot shows a pattern in the distribution
+Equal Variance - met, the third plot shows a near horizontal line with equally spread points.
+
+Normality and linearity are not met, so they seem the least strict. Independence and equal variance are met, so these assumptions seem the most strict.
+
+```{r ref.label=knitr::all_labels(), echo=TRUE, eval=FALSE}
+```
+
+
+
+
