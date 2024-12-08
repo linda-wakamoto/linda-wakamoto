@@ -1,0 +1,423 @@
+---
+title: "PHP_1511_Final"
+author: "Linda Wakamoto"
+date: "2024-08-14"
+output: html_document
+---
+```{r}
+title: "PHP1511 Final Project"
+author: "Linda Wakamoto"
+date: '2023-04-14'
+output: html_document
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# install nhanes library
+library(nhanesA)
+library(dplyr)
+library(tidyverse)
+```
+
+## Replication of NHANES Lead Association Study
+
+Extract relevant variables! Hypertension, smoking behavior, bmi, systolic, diastolic, blood lead level (ug/dl)
+
+age, male, race, education level, ratio of income to poverty, alcohol use
+
+```{r}
+# lead
+lead_1999 <- nhanes('LAB06')[c('SEQN','LBXBPB')]
+lead_2001 <- nhanes('L06_B')[c('SEQN','LBXBPB')]
+lead_2003 <- nhanes('L06BMT_C')[c('SEQN','LBXBPB')]
+lead_2005 <- nhanes('PbCd_D')[c('SEQN','LBXBPB')]
+lead_2007 <- nhanes('PbCd_E')[c('SEQN','LBXBPB')]
+lead_2009 <- nhanes('PbCd_F')[c('SEQN','LBXBPB')]
+lead_2011 <- nhanes('PbCd_G')[c('SEQN','LBXBPB')]
+lead_2013 <- nhanes('PbCd_H')[c('SEQN','LBXBPB')]
+lead_2015 <- nhanes('PbCd_I')[c('SEQN','LBXBPB')]
+lead_2017 <- nhanes('PbCd_J')[c('SEQN','LBXBPB')]
+all_lead <- bind_rows(lead_1999, lead_2001, lead_2003, lead_2005, lead_2007, lead_2009, lead_2011, lead_2013, lead_2015, lead_2017)
+colnames(all_lead) <- c('PATIENT_ID','Lead (ug/dl)')
+```
+
+```{r}
+# bmi
+bmi_1999 <- nhanes('BMX')[c('SEQN', 'BMXBMI')]
+bmi_2001 <- nhanes('BMX_B')[c('SEQN', 'BMXBMI')]
+bmi_2003 <- nhanes('BMX_C')[c('SEQN', 'BMXBMI')]
+bmi_2005 <- nhanes('BMX_D')[c('SEQN', 'BMXBMI')]
+bmi_2007 <- nhanes('BMX_E')[c('SEQN', 'BMXBMI')]
+bmi_2009 <- nhanes('BMX_F')[c('SEQN', 'BMXBMI')]
+bmi_2011 <- nhanes('BMX_G')[c('SEQN', 'BMXBMI')]
+bmi_2013 <- nhanes('BMX_H')[c('SEQN', 'BMXBMI')]
+bmi_2015 <- nhanes('BMX_I')[c('SEQN', 'BMXBMI')]
+bmi_2017 <- nhanes('BMX_J')[c('SEQN', 'BMXBMI')]
+all_bmi <- bind_rows(bmi_1999, bmi_2001, bmi_2003, bmi_2005, bmi_2007, bmi_2009, bmi_2011, bmi_2013, bmi_2015, bmi_2017)
+colnames(all_bmi) <- c('PATIENT_ID','BMI (kg/m^2)')
+```
+
+```{r}
+# do you now smoke cigarettes? 1+2 = still smoke, 3 = never smoke
+smo1_1999 <- nhanes('SMQ')[c('SEQN', 'SMQ040')]
+smo1_2001 <- nhanes('SMQ_B')[c('SEQN', 'SMQ040')]
+smo1_2003 <- nhanes('SMQ_C')[c('SEQN', 'SMQ040')]
+smo1_2005 <- nhanes('SMQ_D')[c('SEQN', 'SMQ040')]
+smo1_2007 <- nhanes('SMQ_E')[c('SEQN', 'SMQ040')]
+smo1_2009 <- nhanes('SMQ_F')[c('SEQN', 'SMQ040')]
+smo1_2011 <- nhanes('SMQ_G')[c('SEQN', 'SMQ040')]
+smo1_2013 <- nhanes('SMQ_H')[c('SEQN', 'SMQ040')]
+smo1_2015 <- nhanes('SMQ_I')[c('SEQN', 'SMQ040')]
+smo1_2017 <- nhanes('SMQ_J')[c('SEQN', 'SMQ040')]
+all_smo1 <- bind_rows(smo1_1999, smo1_2001, smo1_2003, smo1_2005, smo1_2007, smo1_2009, smo1_2011, smo1_2013, smo1_2015, smo1_2017)
+colnames(all_smo1) <- c('PATIENT_ID','Currently_Smoke')
+```
+
+```{r}
+# did you quit smoking? 1 = quit smoking
+smo2_1999 <- nhanes('SMQMEC')[c('SEQN', 'SMQ670')]
+smo2_2001 <- nhanes('SMQMEC_B')[c('SEQN', 'SMQ670')]
+smo2_2003 <- nhanes('SMQMEC_C')[c('SEQN', 'SMQ670')]
+smo2_2005 <- nhanes('SMQ_D')[c('SEQN', 'SMQ670')]
+smo2_2007 <- nhanes('SMQ_E')[c('SEQN', 'SMQ670')]
+smo2_2009 <- nhanes('SMQ_F')[c('SEQN', 'SMQ670')]
+smo2_2011 <- nhanes('SMQ_G')[c('SEQN', 'SMQ670')]
+smo2_2013 <- nhanes('SMQ_H')[c('SEQN', 'SMQ670')]
+smo2_2015 <- nhanes('SMQ_I')[c('SEQN', 'SMQ670')]
+smo2_2017 <- nhanes('SMQ_J')[c('SEQN', 'SMQ670')]
+all_smo2 <- bind_rows(smo2_1999, smo2_2001, smo2_2003, smo2_2005, smo2_2007, smo2_2009, smo2_2011, smo2_2013, smo2_2015, smo2_2017)
+colnames(all_smo2) <- c('PATIENT_ID','Quit_Smoke')
+```
+
+Blood Pressure: systolic (readings 1 through 4)
+```{r}
+# blood pressure systolic 1
+sys1_1999 <- nhanes('BPX')[c('SEQN', 'BPXSY1')]
+sys1_2001 <- nhanes('BPX_B')[c('SEQN', 'BPXSY1')]
+sys1_2003 <- nhanes('BPX_C')[c('SEQN', 'BPXSY1')]
+sys1_2005 <- nhanes('BPX_D')[c('SEQN', 'BPXSY1')]
+sys1_2007 <- nhanes('BPX_E')[c('SEQN', 'BPXSY1')]
+sys1_2009 <- nhanes('BPX_F')[c('SEQN', 'BPXSY1')]
+sys1_2011 <- nhanes('BPX_G')[c('SEQN', 'BPXSY1')]
+sys1_2013 <- nhanes('BPX_H')[c('SEQN', 'BPXSY1')]
+sys1_2015 <- nhanes('BPX_I')[c('SEQN', 'BPXSY1')]
+sys1_2017 <- nhanes('BPX_J')[c('SEQN', 'BPXSY1')]
+all_sys1 <- bind_rows(sys1_1999, sys1_2001, sys1_2003, sys1_2005, sys1_2007, sys1_2009, sys1_2011, sys1_2013, sys1_2015, sys1_2017)
+colnames(all_sys1) <- c('PATIENT_ID','SYS_1')
+```
+
+```{r}
+# blood pressure systolic 2
+sys2_1999 <- nhanes('BPX')[c('SEQN', 'BPXSY2')]
+sys2_2001 <- nhanes('BPX_B')[c('SEQN', 'BPXSY2')]
+sys2_2003 <- nhanes('BPX_C')[c('SEQN', 'BPXSY2')]
+sys2_2005 <- nhanes('BPX_D')[c('SEQN', 'BPXSY2')]
+sys2_2007 <- nhanes('BPX_E')[c('SEQN', 'BPXSY2')]
+sys2_2009 <- nhanes('BPX_F')[c('SEQN', 'BPXSY2')]
+sys2_2011 <- nhanes('BPX_G')[c('SEQN', 'BPXSY2')]
+sys2_2013 <- nhanes('BPX_H')[c('SEQN', 'BPXSY2')]
+sys2_2015 <- nhanes('BPX_I')[c('SEQN', 'BPXSY2')]
+sys2_2017 <- nhanes('BPX_J')[c('SEQN', 'BPXSY2')]
+all_sys2 <- bind_rows(sys2_1999, sys2_2001, sys2_2003, sys2_2005, sys2_2007, sys2_2009, sys2_2011, sys2_2013, sys2_2015, sys2_2017)
+colnames(all_sys2) <- c('PATIENT_ID','SYS_2')
+```
+
+```{r}
+# blood pressure systolic 3
+sys3_1999 <- nhanes('BPX')[c('SEQN', 'BPXSY3')]
+sys3_2001 <- nhanes('BPX_B')[c('SEQN', 'BPXSY3')]
+sys3_2003 <- nhanes('BPX_C')[c('SEQN', 'BPXSY3')]
+sys3_2005 <- nhanes('BPX_D')[c('SEQN', 'BPXSY3')]
+sys3_2007 <- nhanes('BPX_E')[c('SEQN', 'BPXSY3')]
+sys3_2009 <- nhanes('BPX_F')[c('SEQN', 'BPXSY3')]
+sys3_2011 <- nhanes('BPX_G')[c('SEQN', 'BPXSY3')]
+sys3_2013 <- nhanes('BPX_H')[c('SEQN', 'BPXSY3')]
+sys3_2015 <- nhanes('BPX_I')[c('SEQN', 'BPXSY3')]
+sys3_2017 <- nhanes('BPX_J')[c('SEQN', 'BPXSY3')]
+all_sys3 <- bind_rows(sys3_1999, sys3_2001, sys3_2003, sys3_2005, sys3_2007, sys3_2009, sys3_2011, sys3_2013, sys3_2015, sys3_2017)
+colnames(all_sys3) <- c('PATIENT_ID','SYS_3')
+```
+
+```{r}
+# blood pressure systolic 4
+sys4_1999 <- nhanes('BPX')[c('SEQN', 'BPXSY4')]
+sys4_2001 <- nhanes('BPX_B')[c('SEQN', 'BPXSY4')]
+sys4_2003 <- nhanes('BPX_C')[c('SEQN', 'BPXSY4')]
+sys4_2005 <- nhanes('BPX_D')[c('SEQN', 'BPXSY4')]
+sys4_2007 <- nhanes('BPX_E')[c('SEQN', 'BPXSY4')]
+sys4_2009 <- nhanes('BPX_F')[c('SEQN', 'BPXSY4')]
+sys4_2011 <- nhanes('BPX_G')[c('SEQN', 'BPXSY4')]
+sys4_2013 <- nhanes('BPX_H')[c('SEQN', 'BPXSY4')]
+sys4_2015 <- nhanes('BPX_I')[c('SEQN', 'BPXSY4')]
+sys4_2017 <- nhanes('BPX_J')[c('SEQN', 'BPXSY4')]
+all_sys4 <- bind_rows(sys4_1999, sys4_2001, sys4_2003, sys4_2005, sys4_2007, sys4_2009, sys4_2011, sys4_2013, sys4_2015, sys4_2017)
+colnames(all_sys4) <- c('PATIENT_ID','SYS_4')
+```
+
+Blood Pressure: diastolic (readings 1 through 4)
+```{r}
+# blood pressure diastolic 1
+dys1_1999 <- nhanes('BPX')[c('SEQN', 'BPXDI1')]
+dys1_2001 <- nhanes('BPX_B')[c('SEQN', 'BPXDI1')]
+dys1_2003 <- nhanes('BPX_C')[c('SEQN', 'BPXDI1')]
+dys1_2005 <- nhanes('BPX_D')[c('SEQN', 'BPXDI1')]
+dys1_2007 <- nhanes('BPX_E')[c('SEQN', 'BPXDI1')]
+dys1_2009 <- nhanes('BPX_F')[c('SEQN', 'BPXDI1')]
+dys1_2011 <- nhanes('BPX_G')[c('SEQN', 'BPXDI1')]
+dys1_2013 <- nhanes('BPX_H')[c('SEQN', 'BPXDI1')]
+dys1_2015 <- nhanes('BPX_I')[c('SEQN', 'BPXDI1')]
+dys1_2017 <- nhanes('BPX_J')[c('SEQN', 'BPXDI1')]
+all_dys1 <- bind_rows(dys1_1999, dys1_2001, dys1_2003, dys1_2005, dys1_2007, dys1_2009, dys1_2011, dys1_2013, dys1_2015, dys1_2017)
+colnames(all_dys1) <- c('PATIENT_ID','DYS_1')
+```
+
+```{r}
+# blood pressure diastolic 2
+dys2_1999 <- nhanes('BPX')[c('SEQN', 'BPXDI2')]
+dys2_2001 <- nhanes('BPX_B')[c('SEQN', 'BPXDI2')]
+dys2_2003 <- nhanes('BPX_C')[c('SEQN', 'BPXDI2')]
+dys2_2005 <- nhanes('BPX_D')[c('SEQN', 'BPXDI2')]
+dys2_2007 <- nhanes('BPX_E')[c('SEQN', 'BPXDI2')]
+dys2_2009 <- nhanes('BPX_F')[c('SEQN', 'BPXDI2')]
+dys2_2011 <- nhanes('BPX_G')[c('SEQN', 'BPXDI2')]
+dys2_2013 <- nhanes('BPX_H')[c('SEQN', 'BPXDI2')]
+dys2_2015 <- nhanes('BPX_I')[c('SEQN', 'BPXDI2')]
+dys2_2017 <- nhanes('BPX_J')[c('SEQN', 'BPXDI2')]
+all_dys2 <- bind_rows(dys2_1999, dys2_2001, dys2_2003, dys2_2005, dys2_2007, dys2_2009, dys2_2011, dys2_2013, dys2_2015, dys2_2017)
+colnames(all_dys2) <- c('PATIENT_ID','DYS_2')
+```
+
+```{r}
+# blood pressure diastolic 3
+dys3_1999 <- nhanes('BPX')[c('SEQN', 'BPXDI3')]
+dys3_2001 <- nhanes('BPX_B')[c('SEQN', 'BPXDI3')]
+dys3_2003 <- nhanes('BPX_C')[c('SEQN', 'BPXDI3')]
+dys3_2005 <- nhanes('BPX_D')[c('SEQN', 'BPXDI3')]
+dys3_2007 <- nhanes('BPX_E')[c('SEQN', 'BPXDI3')]
+dys3_2009 <- nhanes('BPX_F')[c('SEQN', 'BPXDI3')]
+dys3_2011 <- nhanes('BPX_G')[c('SEQN', 'BPXDI3')]
+dys3_2013 <- nhanes('BPX_H')[c('SEQN', 'BPXDI3')]
+dys3_2015 <- nhanes('BPX_I')[c('SEQN', 'BPXDI3')]
+dys3_2017 <- nhanes('BPX_J')[c('SEQN', 'BPXDI3')]
+all_dys3 <- bind_rows(dys3_1999, dys3_2001, dys3_2003, dys3_2005, dys3_2007, dys3_2009, dys3_2011, dys3_2013, dys3_2015, dys3_2017)
+colnames(all_dys3) <- c('PATIENT_ID','DYS_3')
+```
+
+```{r}
+# blood pressure diastolic 4
+dys4_1999 <- nhanes('BPX')[c('SEQN', 'BPXDI4')]
+dys4_2001 <- nhanes('BPX_B')[c('SEQN', 'BPXDI4')]
+dys4_2003 <- nhanes('BPX_C')[c('SEQN', 'BPXDI4')]
+dys4_2005 <- nhanes('BPX_D')[c('SEQN', 'BPXDI4')]
+dys4_2007 <- nhanes('BPX_E')[c('SEQN', 'BPXDI4')]
+dys4_2009 <- nhanes('BPX_F')[c('SEQN', 'BPXDI4')]
+dys4_2011 <- nhanes('BPX_G')[c('SEQN', 'BPXDI4')]
+dys4_2013 <- nhanes('BPX_H')[c('SEQN', 'BPXDI4')]
+dys4_2015 <- nhanes('BPX_I')[c('SEQN', 'BPXDI4')]
+dys4_2017 <- nhanes('BPX_J')[c('SEQN', 'BPXDI4')]
+all_dys4 <- bind_rows(dys4_1999, dys4_2001, dys4_2003, dys4_2005, dys4_2007, dys4_2009, dys4_2011, dys4_2013, dys4_2015, dys4_2017)
+colnames(all_dys4) <- c('PATIENT_ID','DYS_4')
+```
+
+```{r}
+#Age
+age_1999 <- nhanes('DEMO')[c('SEQN','RIDAGEYR')]
+age_2001 <- nhanes('DEMO_B')[c('SEQN','RIDAGEYR')]
+age_2003 <- nhanes('DEMO_C')[c('SEQN','RIDAGEYR')]
+age_2005 <- nhanes('DEMO_D')[c('SEQN','RIDAGEYR')]
+age_2007 <- nhanes('DEMO_E')[c('SEQN','RIDAGEYR')]
+age_2009 <- nhanes('DEMO_F')[c('SEQN','RIDAGEYR')]
+age_2011 <- nhanes('DEMO_G')[c('SEQN','RIDAGEYR')]
+age_2013 <- nhanes('DEMO_H')[c('SEQN','RIDAGEYR')]
+age_2015 <- nhanes('DEMO_I')[c('SEQN','RIDAGEYR')]
+age_2017 <- nhanes('DEMO_J')[c('SEQN','RIDAGEYR')]
+
+all_age <- bind_rows(age_1999, age_2001, age_2003, age_2005, age_2007, age_2009, age_2011, age_2013, age_2015, age_2017)
+colnames(all_age) <- c("PATIENT_ID","Age")
+
+#male
+gender_1999 <- nhanes('DEMO')[c('SEQN','RIAGENDR')]
+gender_2001 <- nhanes('DEMO_B')[c('SEQN','RIAGENDR')]
+gender_2003 <- nhanes('DEMO_C')[c('SEQN','RIAGENDR')]
+gender_2005 <- nhanes('DEMO_D')[c('SEQN','RIAGENDR')]
+gender_2007 <- nhanes('DEMO_E')[c('SEQN','RIAGENDR')]
+gender_2009 <- nhanes('DEMO_F')[c('SEQN','RIAGENDR')]
+gender_2011 <- nhanes('DEMO_G')[c('SEQN','RIAGENDR')]
+gender_2013 <- nhanes('DEMO_H')[c('SEQN','RIAGENDR')]
+gender_2015 <- nhanes('DEMO_I')[c('SEQN','RIAGENDR')]
+gender_2017 <- nhanes('DEMO_J')[c('SEQN','RIAGENDR')]
+
+all_gender <- bind_rows(gender_1999, gender_2001, gender_2003, gender_2005, gender_2007, gender_2009, gender_2011, gender_2013, gender_2015, gender_2017)
+colnames(all_gender) <- c("PATIENT_ID","Male")
+
+#race
+race_1999 <- nhanes('DEMO')[c('SEQN','RIDRETH1')]
+race_2001 <- nhanes('DEMO_B')[c('SEQN','RIDRETH1')]
+race_2003 <- nhanes('DEMO_C')[c('SEQN','RIDRETH1')]
+race_2005 <- nhanes('DEMO_D')[c('SEQN','RIDRETH1')]
+race_2007 <- nhanes('DEMO_E')[c('SEQN','RIDRETH1')]
+race_2009 <- nhanes('DEMO_F')[c('SEQN','RIDRETH1')]
+race_2011 <- nhanes('DEMO_G')[c('SEQN','RIDRETH1')]
+race_2013 <- nhanes('DEMO_H')[c('SEQN','RIDRETH1')]
+race_2015 <- nhanes('DEMO_I')[c('SEQN','RIDRETH1')]
+race_2017 <- nhanes('DEMO_J')[c('SEQN','RIDRETH1')]
+
+all_race <- bind_rows(race_1999, race_2001, race_2003, race_2005, race_2007, race_2009, race_2011, race_2013, race_2015, race_2017)
+colnames(all_race) <- c("PATIENT_ID","Race")
+
+#Education Level
+edu_1999 <- nhanes('DEMO')[c('SEQN','DMDEDUC2')]
+edu_2001 <- nhanes('DEMO_B')[c('SEQN','DMDEDUC2')]
+edu_2003 <- nhanes('DEMO_C')[c('SEQN','DMDEDUC2')]
+edu_2005 <- nhanes('DEMO_D')[c('SEQN','DMDEDUC2')]
+edu_2007 <- nhanes('DEMO_E')[c('SEQN','DMDEDUC2')]
+edu_2009 <- nhanes('DEMO_F')[c('SEQN','DMDEDUC2')]
+edu_2011 <- nhanes('DEMO_G')[c('SEQN','DMDEDUC2')]
+edu_2013 <- nhanes('DEMO_H')[c('SEQN','DMDEDUC2')]
+edu_2015 <- nhanes('DEMO_I')[c('SEQN','DMDEDUC2')]
+edu_2017 <- nhanes('DEMO_J')[c('SEQN','DMDEDUC2')]
+
+all_edu <- bind_rows(edu_1999, edu_2001, edu_2003, edu_2005, edu_2007, edu_2009, edu_2011, edu_2013, edu_2015, edu_2017)
+colnames(all_edu) <- c("PATIENT_ID","Education level")
+
+#ratio of family income to poverty
+ratio_1999 <- nhanes('DEMO')[c('SEQN','INDFMPIR')]
+ratio_2001 <- nhanes('DEMO_B')[c('SEQN','INDFMPIR')]
+ratio_2003 <- nhanes('DEMO_C')[c('SEQN','INDFMPIR')]
+ratio_2005 <- nhanes('DEMO_D')[c('SEQN','INDFMPIR')]
+ratio_2007 <- nhanes('DEMO_E')[c('SEQN','INDFMPIR')]
+ratio_2009 <- nhanes('DEMO_F')[c('SEQN','INDFMPIR')]
+ratio_2011 <- nhanes('DEMO_G')[c('SEQN','INDFMPIR')]
+ratio_2013 <- nhanes('DEMO_H')[c('SEQN','INDFMPIR')]
+ratio_2015 <- nhanes('DEMO_I')[c('SEQN','INDFMPIR')]
+ratio_2017 <- nhanes('DEMO_J')[c('SEQN','INDFMPIR')]
+
+all_ratio <- bind_rows(ratio_1999, ratio_2001, ratio_2003, ratio_2005, ratio_2007, ratio_2009, ratio_2011, ratio_2013, ratio_2015, ratio_2017)
+colnames(all_ratio) <- c("PATIENT_ID","Ratio of family income to poverty")
+
+#alcohol use
+alc_1999 <- nhanes('ALQ')[c('SEQN','ALQ110')]
+alc_2001 <- nhanes('ALQ_B')[c('SEQN','ALQ110')]
+alc_2003 <- nhanes('ALQ_C')[c('SEQN','ALQ110')]
+alc_2005 <- nhanes('ALQ_D')[c('SEQN','ALQ110')]
+alc_2007 <- nhanes('ALQ_E')[c('SEQN','ALQ110')]
+alc_2009 <- nhanes('ALQ_F')[c('SEQN','ALQ110')]
+alc_2011 <- nhanes('ALQ_G')[c('SEQN','ALQ110')]
+alc_2013 <- nhanes('ALQ_H')[c('SEQN','ALQ110')]
+alc_2015 <- nhanes('ALQ_I')[c('SEQN','ALQ110')]
+alc_2017 <- nhanes('ALQ_J')[c('SEQN','ALQ111')] 
+
+all_alc <- bind_rows(alc_1999, alc_2001, alc_2003, alc_2005, alc_2007, alc_2009, alc_2011, alc_2013, alc_2015, alc_2017)
+colnames(all_alc) <- c("PATIENT_ID","Alcohol use")
+all_alc <- all_alc[1:2]
+```
+
+Merge all of the all_variables using merge by PATIENT_ID
+
+```{r}
+#put all data frames into list
+df_list <- list(all_age, all_alc, all_bmi, all_dys1, all_dys2, all_dys3, all_dys4, all_edu, all_gender, all_lead, all_race, all_ratio, all_smo1, all_smo2, all_sys1, all_sys2, all_sys3, all_sys4)
+
+#merge all data frames in list
+all_data <- df_list %>% reduce(full_join, by='PATIENT_ID')
+all_data <- data.frame(lapply(all_data,as.numeric))
+```
+
+Alter the smoking data into one variable
+```{r}
+# create a new column in the dataframe based on the smoke_status column
+# 0 - never, 1 - quit, 2 - still smoking
+all_data$all_smoking <- NA
+for (i in 1:nrow(all_data)) {
+  
+  if (!is.na(all_data$Currently_Smoke[i]) && (all_data$Currently_Smoke[i] == 1 || all_data$Currently_Smoke[i] == 2)) {
+    all_data$all_smoking[i] <- "2"
+  }
+ 
+  else if(!is.na(all_data$Currently_Smoke[i]) && all_data$Currently_Smoke[i] == 3){
+    all_data$all_smoking[i] <- "0"
+  }
+  
+  else if(!is.na(all_data$Quit_Smoke[i]) && all_data$Quit_Smoke[i] == 1){
+    all_data$all_smoking[i] <- "1"
+  }
+  
+}
+```
+Get the systolic and diastolic recordings.
+```{r}
+all_data$avg_sys <- NA
+  for(i in 1:nrow(all_data)) {
+    if  (is.na(all_data$SYS_2[i]) & is.na(all_data$SYS_3[i]) & is.na(all_data$SYS_4[i])){
+       all_data$avg_sys[i] <- all_data$SYS_1[i]
+    }
+    else{
+      all_data$avg_sys[i] <- mean(c(all_data$SYS_2[i], all_data$SYS_3[i], all_data$SYS_4[i]), na.rm = TRUE)
+    }
+  }
+```
+
+```{r}
+all_data$avg_dys <- NA
+  for(i in 1:nrow(all_data)) {
+    if  (is.na(all_data$DYS_2[i]) & is.na(all_data$DYS_3[i]) & is.na(all_data$DYS_4[i])){
+       all_data$avg_dys[i] <- all_data$DYS_1[i]
+    }
+    else{
+      all_data$avg_dys[i] <- mean(c(all_data$DYS_2[i], all_data$DYS_3[i], all_data$DYS_4[i]), na.rm = TRUE)
+    }
+  }
+```
+Get hypertension variable
+```{r}
+all_data$Hypertension <- NA
+for(i in 1:nrow(all_data)){
+ 
+  if ((!is.na(all_data$avg_sys[i]) && !is.na(all_data$avg_dys[i])) && (all_data$avg_sys[i] >= 130 || all_data$avg_dys[i] >= 80)){
+    all_data$Hypertension[i] <- 1
+  }
+  else if (is.na(all_data$avg_sys[i]) && !is.na(all_data$avg_dys[i])){
+    all_data$Hypertension[i] <-NA
+  }
+  else if ((!is.na(all_data$avg_sys[i]) && !is.na(all_data$avg_dys[i])) && (all_data$avg_sys[i] < 130 || all_data$avg_dys[i] < 80)) {
+    all_data$Hypertension[i] <- 0
+  }
+}
+```
+Edit education variable
+```{r}
+#0 is NA
+#1 is < High school
+#2 is High School
+#3 is > High School
+all_data$all_edu <- NA
+for (i in 1:nrow(all_data)) {
+
+  if (!is.na(all_data$Education.level[i]) && (all_data$Education.level[i] == 1 || all_data$Education.level[i] == 2)) {
+    all_data$all_edu[i] <- "1"
+  }
+ 
+  else if(!is.na(all_data$Education.level[i]) && all_data$Education.level[i] == 3){
+    all_data$all_edu[i] <- "2"
+  }
+  
+  else if(!is.na(all_data$Education.level[i]) && (all_data$Education.level[i] == 4 || all_data$Education.level[i] == 5)) {
+    all_data$all_edu[i] <- "3"
+  }
+  else if(!is.na(all_data$Education.level[i]) && (all_data$Education.level[i] == 7 || all_data$Education.level[i] == 9)) {
+    all_data$all_edu[i] <- "0"
+  }
+}
+```
+
+Export all_data into csv after dropping relevant columns
+```{r}
+final_data <- subset(all_data, select = c('Age', 'Alcohol.use', 'BMI..kg.m.2.', 'all_edu', 'Male', 'Lead..ug.dl.', 'Race', 'Ratio.of.family.income.to.poverty', 'all_smoking', 'avg_sys', 'avg_dys', 'Hypertension'))
+
+write.csv(final_data, 'nhanes_data.csv')
+```
+
+# Code Appendix
+```{r ref.label=knitr::all_labels(),echo=TRUE,eval=FALSE}
+```
