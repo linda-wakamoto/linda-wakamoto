@@ -21,7 +21,7 @@ Welcome to my **Portfolio** repository! Here you’ll find a collection of proje
 
 **UCLA MASDS Assignments (Python)**
 
-1. **Machine Learning Coursework 2**: (ML HW 2) This is my Python code that trained a multilayer perceptron using Adam optimizer. It allows for a flexible number of layers and number of nodes in each layer. It uses x as a unit square and y as points within a unit circle.
+1. **Machine Learning Coursework 2**: (HW2.ipynb) This is my Python code that trained a multilayer perceptron using Adam optimizer. It allows for a flexible number of layers and number of nodes in each layer. It uses x as a unit square and y as points within a unit circle.
 
 **Brown University Assignments (R)**
 
