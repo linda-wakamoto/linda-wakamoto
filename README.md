@@ -21,26 +21,11 @@ Welcome to my **Portfolio** repository! Here you’ll find a collection of proje
 
 **UCLA MASDS Assignments (Python)**
 
-1. **Machine Learning Coursework 2**: This is my Python code that trained a multilayer perceptron using Adam optimizer. It allows for a flexible number of layers and number of nodes in each layer. It uses x as a unit square and y as points within a unit circle.
+1. **Machine Learning Coursework 2**: (ML HW 2) This is my Python code that trained a multilayer perceptron using Adam optimizer. It allows for a flexible number of layers and number of nodes in each layer. It uses x as a unit square and y as points within a unit circle.
 
 **Brown University Assignments (R)**
 
-1. **Applied Regression Analysis Final** (PHP_1511_Final.Rmd): This is my final project for the Applied Regression Analysis course that I took at Brown University. My partner and I used data and replicated the analysis from the article “Association Between Blood Lead Level With High Blood Pressure in US (NHANES 1999–2018)”. We cleaned the data, extracted the relevant variables, merged data from consecutive years to one overall variable, did regression analysis, created tables, and stratified tables
-
----
-
-**Other Assignments from Applied Regression Analysis Course**
-
-**Applied Regression Analysis Assignment 1** (PHP_1511_Assignment_1.Rmd): This is the Applied Regression Analysis course's Assignment 1, Simple Linear Regression. Concepts include: loading and visualizing data, simple linear regression, and interpreting coefficients.
-
-**Applied Regression Analysis Assignment 2** (PHP_1511_Assignment_2.Rmd): This is my assignment for the Applied Regression Analysis course's Assignment 2, Inference and Diagnostics. Concepts include: multiple linear regression, inference in regression, and diagnostics.
-
-**Applied Regression Analysis Assignment 3** (PHP_1511_Assignment_3.Rmd): This is my assignment for the Applied Regression Analysis course's Assignment 3, Transformations, Prediction, Model Selection. Concepts include: transformations, interactions, test-train splits, model comparison, and stepwise selection.
-
-**Applied Regression Analysis Assignment 4** (PHP_1511_Assignment_4.Rmd): This is my assignment for the Applied Regression Analysis course's Assignment 4, Logistic Regression. Concepts include: stepwise selection, model validation, logistic regression, model evaluation for binary outcomes.
-
-**Applied Regression Analysis Assignment 5** (PHP_1511_Assignment_5.Rmd): This is my assignment for the Applied Regression Analysis course's Assignment 5, Poisson Regression and Survival Analysis. Concepts include: developing a model, fitting the model, and assessing model fit.
-
+1. **Applied Regression Analysis Final** (PHP_1511_Final.Rmd): This is my final project for the Applied Regression Analysis course that I took at Brown University. My partner and I used the dataset and replicated the analysis from the article “Association Between Blood Lead Level With High Blood Pressure in US (NHANES 1999–2018)”. We cleaned the data, extracted the relevant variables, merged data from consecutive years to one overall variable, did regression analysis, created tables, and stratified tables
 
 ---
 
