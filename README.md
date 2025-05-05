@@ -14,10 +14,10 @@ Welcome to my **Portfolio** repository! Here you’ll find a collection of proje
 
 **UCLA MASDS Assignments/Projects (Python)**
 
-1. **Machine Learning Coursework 2**: (HW2.ipynb) This is my Python code that trained a multilayer perceptron using Adam optimizer. It allows for a flexible number of layers and number of nodes in each layer. It uses x as a unit square and y as points within a unit circle.
-2. **Predictive and Generative AI Final Project**: (NEW_Final_Code) This is my code for my STATS414: Predictive and Generative AI Course. We were tasked to use predictive modeling and generate synthetic data on the CTR Prediction - 2022 DIGIX Global AI Challenge dataset.
+1. **Predictive and Generative AI Final Project**: (NEW_Final_Code) This is my code for my STATS414: Predictive and Generative AI Course. We were tasked to use predictive modeling and generate synthetic data on the CTR Prediction - 2022 DIGIX Global AI Challenge dataset.
    Predictive Models used: Logistic Regression, Random Forest, XGBoost, CatBoost
    Synthetic Data tool used: CTGAN
+2. **Machine Learning Final Assignment**: (ML_Final_Code) This is my Machine Learning course final assignment, where I made functions for XGBoost and SVM.
 
 **Brown University Assignments (R)**
 
