@@ -19,9 +19,10 @@ Welcome to my **Portfolio** repository! Here you’ll find a collection of proje
 
 2. **Boston University Summer Institute of Biostatistics and Data Science - Infectious Diseases Group Project** (SIBS_Infectious_Diseases_Project.Rmd): This is an undergraduate data science research project that I completed with fellow undergraduates at Boston University's Summer Institute of Biostatistics and Data Science Program. We analyzed Ukranian adult data to find a possible correlation between migrant status and drug-resistant Tuberculosis prevalence.
 
-**UCLA MASDS Assignments (Python)**
+**UCLA MASDS Assignments/Projects (Python)**
 
 1. **Machine Learning Coursework 2**: (HW2.ipynb) This is my Python code that trained a multilayer perceptron using Adam optimizer. It allows for a flexible number of layers and number of nodes in each layer. It uses x as a unit square and y as points within a unit circle.
+2. **Predictive and Generative AI Final Project**: (NEW_Final_Code) This is my code for my STATS414: Predictive and Generative AI Course. We were tasked to use predictive modeling and generate synthetic data on the CTR Prediction - 2022 DIGIX Global AI Challenge dataset.
 
 **Brown University Assignments (R)**
 
