@@ -7,7 +7,7 @@ Welcome to my **Portfolio** repository! Here you’ll find a collection of proje
 
 **UCLA MASDS Assignments/Projects (Python)**
 
-1. [**Predictive and Generative AI Final Project**](https://github.com/linda-wakamoto/linda-wakamoto/blob/main/NEW_Final_Code.ipynb): My code for my STATS414: Predictive and Generative AI Course. We were tasked to use predictive modeling and generate synthetic data on the CTR Prediction - 2022 DIGIX Global AI Challenge dataset.
+1. [**Predictive and Generative AI Final Project**](https://github.com/linda-wakamoto/linda-wakamoto/blob/main/NEW_Final_Code.ipynb): My code for my STATS414: Predictive and Generative AI Course Final Project. We were tasked to use predictive modeling and generate synthetic data on the CTR Prediction - 2022 DIGIX Global AI Challenge dataset.
    Predictive Models Used: Logistic Regression, Random Forest, XGBoost, CatBoost; Synthetic Data tool Used: CTGAN
 2. [**Machine Learning Final Assignment**](https://github.com/linda-wakamoto/linda-wakamoto/blob/main/ML_Final_code.ipynb): My Machine Learning course final assignment, where I made functions for XGBoost and SVM.
 
