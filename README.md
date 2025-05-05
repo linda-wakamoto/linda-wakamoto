@@ -3,14 +3,6 @@ Welcome to my **Portfolio** repository! Here you’ll find a collection of proje
 
 ---
 
-## 🚀 Features
-- **Machine Learning**: Implemented regression models, clustering, and time series analysis.
-- **Statistical Analysis**: In-depth statistical analysis and hypothesis testing.
-- **Projects Showcase**: Highlighting real-world problems and their solutions.
-- **Data Visualizations**: Interactive dashboards using **R** and **Python**.
-
----
-
 ## 📂 Table of Contents
 
 **Projects**
@@ -27,6 +19,14 @@ Welcome to my **Portfolio** repository! Here you’ll find a collection of proje
 **Brown University Assignments (R)**
 
 1. **Applied Regression Analysis Final** (PHP_1511_Final.Rmd): This is my final project for the Applied Regression Analysis course that I took at Brown University. My partner and I used the dataset and replicated the analysis from the article “Association Between Blood Lead Level With High Blood Pressure in US (NHANES 1999–2018)”. We cleaned the data, extracted the relevant variables, merged data from consecutive years to one overall variable, did regression analysis, created tables, and stratified tables
+
+---
+
+## 🚀 Features
+- **Machine Learning**: Implemented regression models, clustering, and time series analysis.
+- **Statistical Analysis**: In-depth statistical analysis and hypothesis testing.
+- **Projects Showcase**: Highlighting real-world problems and their solutions.
+- **Data Visualizations**: Interactive dashboards using **R** and **Python**.
 
 ---
 
