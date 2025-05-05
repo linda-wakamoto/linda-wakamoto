@@ -5,11 +5,12 @@ Welcome to my **Portfolio** repository! Here you’ll find a collection of proje
 
 ## 📂 Table of Contents
 
-**UCLA MASDS Assignments/Projects (Python)**
+**UCLA Master of Applied Statistics and Data Science: Assignments/Projects (Python)**
 
-1. [**Predictive and Generative AI Final Project**](https://github.com/linda-wakamoto/linda-wakamoto/blob/main/NEW_Final_Code.ipynb): My code for my STATS414: Predictive and Generative AI Course Final Project. We were tasked to use predictive modeling and generate synthetic data for the CTR Prediction - 2022 DIGIX Global AI Challenge dataset.
+1. [**Predictive and Generative AI Final Project**](https://github.com/linda-wakamoto/linda-wakamoto/blob/main/NEW_Final_Code.ipynb): My code for the STATS414: Predictive and Generative AI Course Final Project. We were tasked to use predictive modeling and generate synthetic data for the CTR Prediction - 2022 DIGIX Global AI Challenge dataset.
    Predictive Models Used: Logistic Regression, Random Forest, XGBoost, CatBoost; Synthetic Data Tool Used: CTGAN
-2. [**Machine Learning Final Assignment**](https://github.com/linda-wakamoto/linda-wakamoto/blob/main/ML_Final_code.ipynb): My Machine Learning course final assignment, where I made functions for XGBoost and SVM.
+2. [**Machine Learning Final Assignment**](https://github.com/linda-wakamoto/linda-wakamoto/blob/main/ML_Final_code.ipynb): STATS413 Machine Learning course final assignment. Topics covered: XGBoost and SVM.
+3. [**Statistics Assignment**](https://github.com/linda-wakamoto/linda-wakamoto/blob/main/HW1.ipynb): My STATS401 Statistical Inference course assignment. Topics covered: hypothesis testing, data preprocessing, data visualization. 
 
 **Other Projects**
 
