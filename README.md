@@ -7,10 +7,11 @@ Welcome to my **Portfolio** repository! Here you’ll find a collection of proje
 
 **UCLA Master of Applied Statistics and Data Science: Assignments/Projects (Python)**
 
-1. [**Predictive and Generative AI Final Project**](https://github.com/linda-wakamoto/linda-wakamoto/blob/main/NEW_Final_Code.ipynb): My code for the STATS414: Predictive and Generative AI Course Final Project. We were tasked to use predictive modeling and generate synthetic data for the CTR Prediction - 2022 DIGIX Global AI Challenge dataset.
+1. [**Statistical Computing Final Project**](https://github.com/linda-wakamoto/linda-wakamoto/blob/main/Final_Project.ipynb): Independent project using Python and C, predicting apartment listing prices from listing details. Project includes data cleaning, data preprocessing, exploratory data analysis and data visualization, and predictive modeling. Models include Linear Regression, Kernel Regression (with C), Random Forest, XGBoost, Gradient Boost, Generalized Additive Models.
+2. [**Predictive and Generative AI Final Project**](https://github.com/linda-wakamoto/linda-wakamoto/blob/main/NEW_Final_Code.ipynb): My code for the STATS414: Predictive and Generative AI Course Final Project. We were tasked to use predictive modeling and generate synthetic data for the CTR Prediction - 2022 DIGIX Global AI Challenge dataset.
    Predictive Models Used: Logistic Regression, Random Forest, XGBoost, CatBoost; Synthetic Data Tool Used: CTGAN
-2. [**Machine Learning Final Assignment**](https://github.com/linda-wakamoto/linda-wakamoto/blob/main/ML_Final_code.ipynb): STATS413 Machine Learning course final assignment. Topics covered: XGBoost and SVM.
-3. [**Statistics Assignment**](https://github.com/linda-wakamoto/linda-wakamoto/blob/main/HW1.ipynb): My STATS401 Statistical Inference course assignment. Topics covered: hypothesis testing, data preprocessing, data visualization. 
+3. [**Machine Learning Final Assignment**](https://github.com/linda-wakamoto/linda-wakamoto/blob/main/ML_Final_code.ipynb): STATS413 Machine Learning course final assignment. Topics covered: XGBoost and SVM.
+4. [**Statistics Assignment**](https://github.com/linda-wakamoto/linda-wakamoto/blob/main/HW1.ipynb): My STATS401 Statistical Inference course assignment. Topics covered: hypothesis testing, data preprocessing, data visualization. 
 
 **Other Projects**
 
