@@ -1,5 +1,5 @@
 # 👩‍💻 My Portfolio
-Welcome to my **Portfolio** repository! Here you’ll find a collection of projects that showcase my skills in **Data Science, Machine Learning, Statistical Programming, and Data Analysis**. Feel free to explore and check out the various projects.
+Welcome to my **Portfolio** repository! Here is a collection of projects that showcase my skills in **Data Science, Machine Learning, Statistical Programming, and Data Analysis**. Feel free to explore and check out the various projects.
 
 ---
 
@@ -30,7 +30,7 @@ Welcome to my **Portfolio** repository! Here you’ll find a collection of proje
 - **Machine Learning**: Implemented regression models, clustering, and time series analysis.
 - **Statistical Analysis**: In-depth statistical analysis and hypothesis testing.
 - **Projects Showcase**: Highlighting real-world problems and their solutions.
-- **Data Visualizations**: Interactive dashboards using **R** and **Python**.
+- **Data Visualizations**: Interactive dashboards using **Python**, **C**, and **R**.
 
 ---
 
